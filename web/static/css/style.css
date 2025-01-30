@@ -1,261 +1,103 @@
-/* General Styles */
-body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f7f7f7;
-    color: #333;
-    line-height: 1.6;
-}
 
-header {
-    background-color: #007bff;
-    color: white;
-    padding: 1rem 0;
-    text-align: center;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
 
-header h1 {
-    margin: 0;
-    font-size: 2.8rem;
-}
+        .container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
 
-nav {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    margin-top: 1rem;
-}
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
 
-nav a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 1.2rem;
-    transition: color 0.3s ease;
-}
+        header p {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
 
-nav a:hover {
-    color: #ffdd57;
-}
+        .input-box {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
 
-nav button {
-    background: none;
-    border: none;
-    color: white;
-    font-weight: bold;
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: color 0.3s ease;
-}
+        .input-box label {
+            display: block;
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
 
-nav button:hover {
-    color: #ffdd57;
-}
+        .input-box input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
 
-main {
-    padding: 2rem;
-    max-width: 900px;
-    margin: 0 auto;
-}
+        .input-box input:focus {
+            border-color: #6a11cb;
+            outline: none;
+        }
 
-/* Form Styles */
-form {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-bottom: 2rem;
-    max-width: 600px;
-    margin: 2rem auto;
-}
+        .input-box input::placeholder {
+            color: #999;
+        }
 
-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: bold;
-    color: #555;
-}
+        .input-box i {
+            position: absolute;
+            margin-top: 0.8rem;
+            margin-left: 0.8rem;
+            color: #999;
+        }
 
-input[type="text"],
-input[type="email"],
-input[type="password"],
-textarea,
-select {
-    width: 100%;
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-}
+        .btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: #6a11cb;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
 
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus,
-textarea:focus,
-select:focus {
-    border-color: #007bff;
-    outline: none;
-}
+        .btn:hover {
+            background: #2575fc;
+        }
 
-button {
-    background-color: #007bff;
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 4px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    width: 100%;
-}
+        .register-link {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
 
-button:hover {
-    background-color: #0056b3;
-}
+        .register-link a {
+            color: #6a11cb;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
 
-/* Post Styles */
-.post {
-    background: white;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.post h2 {
-    margin-top: 0;
-    color: #007bff;
-}
-
-.post p {
-    margin: 0.75rem 0;
-    color: #555;
-}
-
-.post .like-dislike-buttons {
-    margin-top: 1rem;
-    display: flex;
-    gap: 1rem;
-}
-
-.post .like-dislike-buttons button {
-    background: none;
-    border: 1px solid #007bff;
-    color: #007bff;
-    padding: 0.75rem 1.25rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.post .like-dislike-buttons button:hover {
-    background-color: #007bff;
-    color: white;
-}
-
-.post .like-dislike-buttons span {
-    margin-right: 1rem;
-    font-weight: bold;
-}
-
-/* Comment Styles */
-.comment {
-    background: #f9f9f9;
-    padding: 1.5rem;
-    margin: 1.5rem 0;
-    border-left: 5px solid #007bff;
-    border-radius: 4px;
-}
-
-.comment p {
-    margin: 0.5rem 0;
-    color: #555;
-}
-
-.comment strong {
-    color: #007bff;
-}
-
-/* Load More Button */
-.load-more {
-    background: #007bff;
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 4px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-top: 2rem;
-    width: 100%;
-}
-
-.load-more:hover {
-    background-color: #0056b3;
-}
-
-/* Filter Form Styles */
-#filter-form {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin-bottom: 2rem;
-    max-width: 600px;
-    margin: 2rem auto;
-}
-
-#filter-form label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: bold;
-    color: #555;
-}
-
-#filter-form select {
-    width: 100%;
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-}
-
-/* Error Messages */
-.error {
-    color: #dc3545;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-}
-
-input.error {
-    border-color: #dc3545;
-}
-
-/* Add some responsive adjustments for smaller devices */
-@media (max-width: 768px) {
-    header h1 {
-        font-size: 2rem;
-    }
-
-    nav {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .post {
-        padding: 1rem;
-    }
-
-    form {
-        padding: 1.5rem;
-    }
-
-    .load-more {
-        padding: 1rem;
-    }
-}
+        .register-link a:hover {
+            color: #2575fc;
+        }
+    

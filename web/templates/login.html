@@ -1,14 +1,43 @@
-{{ define "title" }}Login{{ end }}
+<!DOCTYPE html>
+<html lang="en">
 
-{{ define "content" }}
-<h2>Login</h2>
-<form method="POST" action="/login">
-    <label for="identifier">Email or Username:</label>
-    <input type="text" id="identifier" name="identifier" required>
-    <br>
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required>
-    <br>
-    <button type="submit">Login</button>
-</form>
-{{ end }}
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="/web/static/css/style.css" />
+    <title>Login - Forum</title>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Welcome Back</h1>
+            <p>Login to your account</p>
+        </header>
+        <form action="/login" class="form" method="post">
+            <div class="input-box">
+                <label>Email Address</label>
+                
+                <input type="email" name="email" placeholder="Enter your email" required />
+            </div>
+
+            <div class="input-box">
+                <label>Password</label>
+                
+                <input type="password" name="password" placeholder="Enter your password" required />
+            </div>
+
+            <button type="submit" class="btn">Login</button>
+
+            
+
+            <div class="register-link">
+                <p>Don't have an account? <a href="/register">Register here</a> or <a href="/">Go Back to homepage</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,122 @@
+/* General layout styles */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f4f7fb;
+    color: #333;
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+header {
+    padding: 20px;
+    background-color: #2563eb;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    margin-left: 20px;
+}
+
+.search-input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    width: 250px;
+}
+
+.nav-item a {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    color: #333;
+    text-decoration: none;
+}
+
+.nav-item a:hover {
+    background-color: #e0e0e0;
+}
+
+.sidebar {
+    flex: 0 0 250px;
+}
+
+.content {
+    flex: 1;
+}
+
+.post-card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.post-title {
+    font-size: 1.5rem;
+    margin-top: 10px;
+}
+
+.post-meta {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.post-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.interaction-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.interaction-btn .count {
+    font-size: 0.9rem;
+}
+
+/* Trending Sidebar Styles */
+.trending-sidebar {
+    width: 250px;
+    flex: 0 0 250px;
+}
+
+.trending-topics {
+    padding: 20px;
+}
+
+.progress-bar {
+    height: 5px;
+    background-color: #2563eb;
+    border-radius: 5px;
+}
