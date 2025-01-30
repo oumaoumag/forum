@@ -101,7 +101,25 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			// Insert categoryID to integer
+			categoryID, err := strconv.Atoi(categoryID)
+			if err != nil {
+				http.Error(w, "Invalid category", http.StatusBadRequest)
+				return
+			}
+			
+			// Insert post into the database
+			query := `
+			INSERT INTO posts (user_id, category_id, title, content)
+			VALUES (?, ?, ?, ?)`
+			_, err = db.DB.Exec(query, userID, categoryIDInt, title, content)
+			if err != nil {
+				http.Error(w, "Unable to create post", http.StatusInternalServerError)
+				return
+			}
 
+			// Redirect to homepage or posts page
+			http.Redirect(w, r, "/", http.StatusFound)
 			}
 		}
 }
