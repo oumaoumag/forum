@@ -55,7 +55,27 @@ for rows.Next() {
 		return
 	}
 
-	// var commments
+	var commments []models.Comment
+	for commentRows.Nexr() {
+		err := CommentsRows.Scan(&comment.CommentID, &comment.Username, &comment.CreatedAt)
+		if err != nil {
+			http.Error(w, "Error scanning comments", http.StatusInternalServerError)
+			return
+		}
+		comments = append(comments, comment)
+	}
+	commentRows.Close()
+
+	post.Comments = comments
+	posts = append(posts, post)
 }
 
+tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/home.html"))
+
+err = tmpl.Execute(w, posts)
+if err != nil {
+	log.Println(err)
+	http.Error(w, "Unable to render template", http.StatusInternalServerError)
+	return
+}
 }
