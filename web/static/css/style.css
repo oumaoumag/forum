@@ -3,7 +3,7 @@ body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f9;
+    background-color: #f7f7f7;
     color: #333;
     line-height: 1.6;
 }
@@ -13,18 +13,18 @@ header {
     color: white;
     padding: 1rem 0;
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 header h1 {
     margin: 0;
-    font-size: 2.5rem;
+    font-size: 2.8rem;
 }
 
 nav {
     display: flex;
     justify-content: center;
-    gap: 1.5rem;
+    gap: 2rem;
     margin-top: 1rem;
 }
 
@@ -32,7 +32,7 @@ nav a {
     color: white;
     text-decoration: none;
     font-weight: bold;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     transition: color 0.3s ease;
 }
 
@@ -45,7 +45,7 @@ nav button {
     border: none;
     color: white;
     font-weight: bold;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     cursor: pointer;
     transition: color 0.3s ease;
 }
@@ -56,17 +56,19 @@ nav button:hover {
 
 main {
     padding: 2rem;
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
 }
 
 /* Form Styles */
 form {
     background: white;
-    padding: 1.5rem;
+    padding: 2rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
+    max-width: 600px;
+    margin: 2rem auto;
 }
 
 label {
@@ -105,9 +107,10 @@ button {
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: 4px;
-    font-size: 1rem;
+    font-size: 1.1rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    width: 100%;
 }
 
 button:hover {
@@ -117,10 +120,10 @@ button:hover {
 /* Post Styles */
 .post {
     background: white;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .post h2 {
@@ -129,20 +132,21 @@ button:hover {
 }
 
 .post p {
-    margin: 0.5rem 0;
+    margin: 0.75rem 0;
     color: #555;
 }
 
 .post .like-dislike-buttons {
     margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
 }
 
 .post .like-dislike-buttons button {
     background: none;
     border: 1px solid #007bff;
     color: #007bff;
-    padding: 0.5rem 1rem;
-    margin-right: 0.5rem;
+    padding: 0.75rem 1.25rem;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -161,14 +165,14 @@ button:hover {
 /* Comment Styles */
 .comment {
     background: #f9f9f9;
-    padding: 1rem;
-    margin: 1rem 0;
-    border-left: 3px solid #007bff;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border-left: 5px solid #007bff;
     border-radius: 4px;
 }
 
 .comment p {
-    margin: 0.25rem 0;
+    margin: 0.5rem 0;
     color: #555;
 }
 
@@ -183,10 +187,11 @@ button:hover {
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: 4px;
-    font-size: 1rem;
+    font-size: 1.1rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    margin-top: 1rem;
+    margin-top: 2rem;
+    width: 100%;
 }
 
 .load-more:hover {
@@ -196,10 +201,12 @@ button:hover {
 /* Filter Form Styles */
 #filter-form {
     background: white;
-    padding: 1.5rem;
+    padding: 2rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
+    max-width: 600px;
+    margin: 2rem auto;
 }
 
 #filter-form label {
@@ -227,4 +234,28 @@ button:hover {
 
 input.error {
     border-color: #dc3545;
+}
+
+/* Add some responsive adjustments for smaller devices */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+
+    nav {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .post {
+        padding: 1rem;
+    }
+
+    form {
+        padding: 1.5rem;
+    }
+
+    .load-more {
+        padding: 1rem;
+    }
 }
