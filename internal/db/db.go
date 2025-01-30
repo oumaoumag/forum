@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
 )
 
 var DB *sql.DB
@@ -57,4 +58,12 @@ func createCategories() {
 		}
 	}
 	
+}
+
+func CleanupExpiredSession() {
+	query := `DELETE FROM session WHERE expires_at < ?`
+	_, err := DB.Exec(query, time.Now().Add(-24*time.Hour))
+	if err != nil {
+		log.Printf("Error cleaning up sessions: %v", err)
+	}
 }
