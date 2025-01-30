@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS users (
+    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    email TEXT NOT NUL UNIQUE,
+    password TEXT NOT NULL ,
+    profile_picture TEXT,
+    bio TEXT,
+    created_at DATETIME DEFAULT CURRENT TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT TIMESTAMP
+);
