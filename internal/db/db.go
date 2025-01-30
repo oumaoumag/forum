@@ -35,4 +35,20 @@ func createTables() {
 		log.Fatalf("Failed to execute statements: %v\nQuery: %s\n", err, sqlStatements)
 	}
 	log.Println("All tables created successfully")
+
+}
+
+func createCategories() {
+	predefinedCategories := []struct{
+		Name 	string
+		Description string
+	}{
+		{"Technology", "Posts related to the latest technologies and trends"},
+		{"Health", "Discussions about health, fitmess and well being"},
+		{"Education", "Topics about learning and education"},
+		{"Entertainment", "Movies, music, games and all things fun"},
+		{"Lifestyle", "Fashion, home decore, and daily living tips."},
+		{"Travel", "Exploring the world and sharing travel experience"},
+	}
+	
 }
