@@ -50,5 +50,11 @@ func createCategories() {
 		{"Lifestyle", "Fashion, home decore, and daily living tips."},
 		{"Travel", "Exploring the world and sharing travel experience"},
 	}
+	for _, category := range predefinedCategories {
+		_, err := DB.Exec(`INSERT OR IGNORE INTO categories (name, descrption)VALUE (?, ?)`,category.Name, category.Description)
+		if err != nil {
+			log.Printf("Error inserting category '%s': '%v'",category.Name, err)
+		}
+	}
 	
 }
