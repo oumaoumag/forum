@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/">
+    <link rel="stylesheet" href="static/css/styles.css">
+    <title>{{ block "title" . }}Forum{{ end }}</title>
+</head>
+<body>
+    <header>
+        <h1>Welcome to the Forum</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+            <a>
+                <form action="/logout" method="POST">
+                    <button type="submit">Logout</button>
+                </form>
+            </a>
+        </nav>
+    </header>
+    <main>
+        {{ block "content" . }}{{ end }}
+    </main>
+    <script src="static/js/main.js"></script>
+</body>
+</html>
