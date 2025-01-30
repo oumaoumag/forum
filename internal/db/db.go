@@ -67,3 +67,12 @@ func CleanupExpiredSession() {
 		log.Printf("Error cleaning up sessions: %v", err)
 	}
 }
+
+func ScheduleSessionCleanup() {
+	ticker := time.NewTicker(1 * time.Hour)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		CleanupExpiredSession()
+	}
+}
