@@ -4,15 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <base href="/">
-    <link rel="stylesheet" href="static/css/styles.css">
-    <title>{{ block "title" . }}Forum{{ end }}</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <title>Forum</title>
 </head>
 <body>
     <header>
-        <div class="container">
-            <!-- Include Sidebar -->
-            {{ template "sidebar.html" . }}
-    
         <h1>Welcome to the Forum</h1>
         <nav>
             <a href="/">Home</a>
@@ -20,15 +16,14 @@
             <a href="/register">Register</a>
             <a>
                 <form action="/logout" method="POST">
-                    <button type="submit">Logout</button>
+                    <button style="margin:0;padding:0;" type="submit">Logout</button>
                 </form>
             </a>
         </nav>
     </header>
-    </div>
     <main>
-        {{ block "content" . }}{{ end }}
+        {{block "content" .}}
+        {{ end }}
     </main>
-    <script src="static/js/main.js"></script>
 </body>
 </html>

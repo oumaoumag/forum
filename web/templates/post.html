@@ -1,6 +1,6 @@
 {{ define "title" }}Create Post{{ end }}
 
-{{ define "content" }}
+{{define "content"}}
 <h2>Create a New Post</h2>
 <form method="POST" action="/post/create">
     <label for="title">Title:</label>
@@ -13,22 +13,12 @@
 
     <label for="category">Category:</label>
     <select id="category" name="category" required>
-        {{ range . }}
-        <option value="{{ .CategoryID }}">{{ .Name }}</option>
-        {{ end }}
+        {{range .}}
+        <option value="{{.CategoryID}}">{{.Name}}</option>
+        {{end}}
     </select>
     <br><br>
 
     <button type="submit">Create Post</button>
 </form>
-<div class="post">
-    <h2>{{ .Title }}</h2>
-    <p>{{ .Content }}</p>
-    <p>
-        <button class="like-button" data-post-id="{{ .PostID }}">Like</button>
-        <span id="like-count-{{ .PostID }}">{{ .LikeCount }}</span>
-        <button class="dislike-button" data-post-id="{{ .PostID }}">Dislike</button>
-        <span id="dislike-count-{{ .PostID }}">{{ .DislikeCount }}</span>
-    </p>
-</div>
-{{ end }}
+{{end}}
