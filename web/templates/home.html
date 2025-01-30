@@ -1,0 +1,63 @@
+{{ define "title" }}Forum Home Page{{ end }}
+
+{{ define "content" }}
+<h2>Forum Home Page</h2>
+<p>Welcome to the forum!</p>
+{{ if . }}
+    {{ range . }}
+    <div class="post">
+        <h2>{{ .Title }}</h2>
+        <p><strong>Posted by:</strong> {{ .Username }} | <strong>Category:</strong> {{ .Category }} | <strong>Created at:</strong> {{ .CreatedAt }}</p>
+        <p>{{ .Content }}</p>
+        <p>
+            <button class="like-button" data-post-id="{{ .PostID }}">Like</button>
+            <span id="like-count-{{ .PostID }}">{{ .LikeCount }}</span>
+            <button class="dislike-button" data-post-id="{{ .PostID }}">Dislike</button>
+            <span id="dislike-count-{{ .PostID }}">{{ .DislikeCount }}</span>
+        </p>
+        <h3>Comments</h3>
+        <div id="comments-section-{{ .PostID }}">
+            {{ if .Comments }}
+                {{ range .Comments }}
+                <div class="comment">
+                    <p><strong>{{ .Username }}</strong> ({{ .CreatedAt }}):</p>
+                    <p>{{ .Content }}</p>
+                </div>
+                {{ end }}
+            {{ else }}
+                <p>No comments yet. Be the first to comment!</p>
+            {{ end }}
+        </div>
+        <button class="load-more" data-post-id="{{ .PostID }}" data-offset="5">Load More</button>
+
+        <!-- Add Comment Form -->
+        <h3>Add a comment</h3>
+        <form method="POST" action="/comment/create">
+            <input type="hidden" name="post_id" value="{{ .PostID }}">
+            <textarea name="content" rows="4" required></textarea>
+            <br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <form id="filter-form">
+        <label for="filter-category">Category:</label>
+        <select id="filter-category" name="category">
+            <option value="">All</option>
+            {{ range .Categories }}
+            <option value="{{ .CategoryID }}">{{ .Name }}</option>
+            {{ end }}
+        </select>
+    
+        <label for="filter-sort">Sort By:</label>
+        <select id="filter-sort" name="sort">
+            <option value="date">Date</option>
+            <option value="likes">Likes</option>
+        </select>
+    
+        <button type="submit">Filter</button>
+    </form>
+    {{ end }}
+{{ else }}
+    <p>No posts to display.</p>
+{{ end }}
+{{ end }}
