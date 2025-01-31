@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="/web/static/css/style.css" />
+    <title>Register - Forum</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Register Account</h1>
+            <p>Join our community and start your journey</p>
+        </header>
+        <form action="/register" class="form" method="post">
+            <div class="input-box">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required />
+            </div>
+
+            <div class="input-box">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required />
+            </div>
+
+            <div class="input-box">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required />
+            </div>
+
+            <div class="input-box">
+                <label for="confirm">Confirm Password</label>
+                <input type="password" id="confirm" name="confirm" placeholder="Confirm your password" required />
+            </div>
+
+            <button type="submit" class="btn">Register Account</button>
+            
+            <div class="register-link">
+                <p>Already have an account? <a href="/login">Login here</a> or <a href="/">Go Back to homepage</a></p>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

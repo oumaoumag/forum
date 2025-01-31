@@ -1,0 +1,103 @@
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-box {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .input-box label {
+            display: block;
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-box input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-box input:focus {
+            border-color: #6a11cb;
+            outline: none;
+        }
+
+        .input-box input::placeholder {
+            color: #999;
+        }
+
+        .input-box i {
+            position: absolute;
+            margin-top: 0.8rem;
+            margin-left: 0.8rem;
+            color: #999;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: #6a11cb;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #2575fc;
+        }
+
+        .register-link {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .register-link a {
+            color: #6a11cb;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .register-link a:hover {
+            color: #2575fc;
+        }
+    

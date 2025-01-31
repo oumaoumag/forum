@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Post Details - Forum Community</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea, #764ba2); /* Gradient background */
+            min-height: 100vh;
+        }
+
+        /* Header Styles */
+        header.card {
+            background: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+            padding: 15px 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px); /* Blur effect */
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo h1 {
+            color: #2563eb;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .username {
+            font-weight: 500;
+            color: #4b5563;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        #login-btn {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        #login-btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        #register-btn, #logout-btn {
+            background-color: #f3f4f6;
+            color: #4b5563;
+        }
+
+        #register-btn:hover, #logout-btn:hover {
+            background-color: #e5e7eb;
+        }
+
+        /* Main Content Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Post Details Card */
+        .post-card-details {
+            background: rgba(255, 255, 255, 0.95); /* Semi-transparent white */
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 900px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px); /* Blur effect */
+        }
+
+        .post-header {
+            margin-bottom: 25px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 20px;
+        }
+
+        .post-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .post-author {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2563eb;
+        }
+
+        .post-date {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .post-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 15px;
+        }
+
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #4b5563;
+            margin-bottom: 30px;
+        }
+
+        .post-image img {
+            width: 100%;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        /* Like/Dislike Buttons */
+        .post-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .post-actions .btn-like {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            background-color: #f8fafc;
+            color: #4b5563;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .post-actions .btn-like:hover {
+            background-color: #e5e7eb;
+        }
+
+        .post-actions .btn-like.liked {
+            background-color: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .post-actions .btn-like.disliked {
+            background-color: #dc2626;
+            color: white;
+            border-color: #dc2626;
+        }
+
+        /* Comment Form */
+        .new-comment {
+            background: rgba(248, 250, 252, 0.9); /* Semi-transparent white */
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px); /* Blur effect */
+        }
+
+        .comment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .comment-input {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border-color 0.2s ease;
+        }
+
+        .comment-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .submit-btn {
+            align-self: flex-end;
+            padding: 10px 20px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* Comments Section */
+        .comments-section {
+            margin-top: 30px;
+        }
+
+        .comments-header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .comment-card {
+            background: rgba(248, 250, 252, 0.9); /* Semi-transparent white */
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: transform 0.2s ease;
+            backdrop-filter: blur(10px); /* Blur effect */
+        }
+
+        .comment-card:hover {
+            transform: translateX(5px);
+        }
+
+        .comment-card .post-meta {
+            margin-bottom: 10px;
+        }
+
+        .comment-card .post-content {
+            margin-bottom: 0;
+            font-size: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .post-card-details {
+                padding: 20px;
+                margin: 15px;
+            }
+
+            .post-title {
+                font-size: 1.5rem;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="card">
+        <div class="header-content">
+            <div class="logo">
+                <a href="/">
+                    <i class="fas fa-comments"></i>
+                    <h1>Forum Community</h1>
+                </a>
+            </div>
+            <div class="header-actions">
+                {{if .IsLoggedIn}}
+                <div class="user-menu">
+                    <span class="username"><i class="fas fa-user"></i> Welcome, {{.Username}}</span>
+                    <a href="/logout">
+                        <button class="btn" id="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </a>
+                </div>
+                {{else}}
+                <a href="/login">
+                    <button class="btn" id="login-btn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </a>
+                <a href="/register">
+                    <button class="btn" id="register-btn">
+                        <i class="fas fa-user-plus"></i> Register
+                    </button>
+                </a>
+                {{end}}
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="post-card-details">
+            <div class="post-header">
+                <div class="post-meta">
+                    <span class="post-author">
+                        <i class="fas fa-user-circle"></i> {{.Post.Username}}
+                    </span>
+                    <span class="post-date">
+                        <i class="far fa-clock"></i> {{.Post.CreatedAt.Format "Jan 02, 2006 15:04"}}
+                    </span>
+                </div>
+                <h1 class="post-title">{{.Post.Title}}</h1>
+                {{if .Post.Categories}}
+                <div class="post-categories">
+                    {{range .Post.Categories}}
+                    <span class="category-tag">
+                        <i class="fas fa-tag"></i> {{.Name}}
+                    </span>
+                    {{end}}
+                </div>
+                {{end}}
+            </div>
+
+            <div class="post-content">
+                <p>{{.Post.Content}}</p>
+                {{if .Post.ImageName}}
+                <div class="post-image">
+                    <img src="../static/post_images/{{.Post.ImageName}}" alt="{{.Post.Title}}" />
+                </div>
+                {{end}}
+            </div>
+
+            <!-- Like/Dislike Buttons -->
+            <div class="post-actions">
+                <a href="/post/like?post_id={{.PostID}}">
+                    <button class="btn-like {{if .IsLiked}}liked{{end}}">
+                        <i class="fas fa-thumbs-up"></i> Like ({{.LikesCount}})
+                    </button>
+                </a>
+                <a href="/post/dislike?post_id={{.PostID}}">
+                    <button class="btn-like {{if .IsDisliked}}disliked{{end}}">
+                        <i class="fas fa-thumbs-down"></i> Dislike ({{.DislikesCount}})
+                    </button>
+                </a>
+            </div>
+
+            {{if .IsLoggedIn}}
+            <div class="new-comment">
+                <form action="/comment" method="POST" class="comment-form">
+                    <input type="hidden" name="post_id" value="{{.PostID}}" />
+                    <textarea 
+                        name="comment" 
+                        class="comment-input" 
+                        placeholder="Share your thoughts on this post..." 
+                        required
+                    ></textarea>
+                    <button class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> Post Comment
+                    </button>
+                </form>
+            </div>
+            {{end}}
+
+            <div class="comments-section">
+                <div class="comments-header">
+                    <h2><i class="far fa-comments"></i> Comments ({{len .Comments}})</h2>
+                </div>
+                {{if len .Comments}}
+                {{range .Comments}}
+                <div class="comment-card">
+                    <div class="post-meta">
+                        <span class="post-author">
+                            <i class="fas fa-user-circle"></i> {{.Username}}
+                        </span>
+                        <span class="post-date">
+                            <i class="far fa-clock"></i> {{.CreatedAt.Format "Jan 02, 2006 15:04"}}
+                        </span>
+                    </div>
+                    <div class="post-content">{{.Content}}</div>
+                </div>
+                {{end}}
+                {{else}}
+                <div class="comment-card">
+                    <div class="post-content" style="text-align: center;">
+                        <i class="far fa-comment-dots" style="font-size: 2rem; color: #6b7280; margin-bottom: 10px;"></i>
+                        <p>No comments yet. Be the first to share your thoughts!</p>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add smooth scrolling to comment section if URL has #comments
+        document.addEventListener('DOMContentLoaded', function() {
+            if(window.location.hash === '#comments') {
+                document.querySelector('.comments-section').scrollIntoView({ 
+                    behavior: 'smooth' 
+                });
+            }
+        });
+    </script>
+</body>
+</html>
