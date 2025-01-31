@@ -18,18 +18,20 @@
             font-family: 'Inter', sans-serif;
             line-height: 1.6;
             color: #333;
-            background-color: #f5f7fa;
+            background: linear-gradient(135deg, #667eea, #764ba2); /* Gradient background */
+            min-height: 100vh;
         }
 
         /* Header Styles */
         header.card {
-            background: #fff;
+            background: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
             padding: 15px 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
             z-index: 1000;
             margin-bottom: 30px;
+            backdrop-filter: blur(10px); /* Blur effect */
         }
 
         .header-content {
@@ -107,12 +109,13 @@
 
         /* Post Details Card */
         .post-card-details {
-            background: white;
+            background: rgba(255, 255, 255, 0.95); /* Semi-transparent white */
             border-radius: 12px;
             padding: 30px;
             margin: 20px auto;
             max-width: 900px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px); /* Blur effect */
         }
 
         .post-header {
@@ -151,6 +154,12 @@
             line-height: 1.7;
             color: #4b5563;
             margin-bottom: 30px;
+        }
+
+        .post-image img {
+            width: 100%;
+            border-radius: 10px;
+            margin-top: 20px;
         }
 
         /* Like/Dislike Buttons */
@@ -192,10 +201,11 @@
 
         /* Comment Form */
         .new-comment {
-            background: #f8fafc;
+            background: rgba(248, 250, 252, 0.9); /* Semi-transparent white */
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 30px;
+            backdrop-filter: blur(10px); /* Blur effect */
         }
 
         .comment-form {
@@ -218,7 +228,7 @@
         .comment-input:focus {
             outline: none;
             border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         .submit-btn {
@@ -249,11 +259,12 @@
         }
 
         .comment-card {
-            background: #f8fafc;
+            background: rgba(248, 250, 252, 0.9); /* Semi-transparent white */
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 15px;
             transition: transform 0.2s ease;
+            backdrop-filter: blur(10px); /* Blur effect */
         }
 
         .comment-card:hover {
