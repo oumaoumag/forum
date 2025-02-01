@@ -1,23 +1,23 @@
 package handlers
 
-import {
+import (
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"forum/internal/auth"
 	"forum/internal/db"
-}
+)
 
-func CreateCommentHandler(w http.ResponseWriter, r. *http.Request) {
+func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodAllowed)
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
 
 	userID, ok := auth.GetUserID(r)
 	if !ok || userID == "" {
-		HTTP.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 	

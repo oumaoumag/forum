@@ -85,7 +85,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		// Render the register page
-		tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/register.html"))
+		tmpl := template.Must(template.ParseFiles("../web/templates/layout.html", "../web/templates/register.html"))
 		err := tmpl.Execute(w, nil)
 		if err != nil {
 			log.Println(err)
@@ -129,7 +129,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Hash the password
-		hashedPassword, err := utils.hashedPassword(password)
+		hashedPassword, err := utils.HashPassword(password)
 		if err != nil {
 			http.Error(w, "Server error", http.StatusInternalServerError)
 			log.Printf("Password hashing error: %v\n", err)
@@ -148,7 +148,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 }
-
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {

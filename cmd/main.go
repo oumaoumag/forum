@@ -3,24 +3,38 @@ package main
 import (
 	"log"
 	"net/http"
+
+	"forum/internal/auth"
+	"forum/internal/db"
+	"forum/internal/handlers"
 )
 
 func main() {
-	// Create a new ServeMux to handle routing
+	// Initialize the database
+	db.Init()
+	go db.ScheduleSessionCleanup()
+
 	mux := http.NewServeMux()
 
-	// Create a file server to serve static files from the "web/static" directory
 	fs := http.FileServer(http.Dir("web/static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	server := &http.Server{
-		Addr:    ":8080", // Listen on port 8080
-		Handler: mux,     // Use the defined ServeMux as the handler
+	// Set up routes
+	mux.HandleFunc("/", handlers.HomeHandler)
+	mux.Handle("/login", auth.SessionMiddleware(auth.RedirectIfAuthenticated(http.HandlerFunc(handlers.LoginHandler))))
+	mux.Handle("/register", auth.SessionMiddleware(auth.RedirectIfAuthenticated(http.HandlerFunc(handlers.RegisterHandler))))
+	mux.Handle("/post/create", auth.SessionMiddleware(auth.RequireAuth(http.HandlerFunc(handlers.CreatePostHandler))))
+	mux.Handle("/comment/create", auth.SessionMiddleware(auth.RequireAuth(http.HandlerFunc(handlers.CreateCommentHandler))))
+	// mux.Handle("/like", auth.SessionMiddleware(auth.RequireAuth(http.HandlerFunc(handlers.LikeHandler))))
+	mux.Handle("/logout", auth.SessionMiddleware(auth.RequireAuth(http.HandlerFunc(handlers.LogoutHandler))))
+
+	server := http.Server{
+		Addr:    ":8080",
+		Handler: mux,
 	}
 
 	log.Println("Server started at http://localhost:8080")
-	// Start the server and log any errors
 	if err := server.ListenAndServe(); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
+		log.Fatalf("Failed to start server: %v", err)
 	}
 }

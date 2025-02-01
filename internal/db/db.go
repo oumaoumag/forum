@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"time"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var DB *sql.DB
@@ -22,7 +24,7 @@ func Init() {
 }
 
 func createTables() {
-	sqlFile, err := os.Open("internal/db/schema.sql")
+	sqlFile, err := os.Open("../internal/db/schema.sql")
 	if err != nil {
 		log.Fatalf("failed to open the chema file: %v\n", err)
 	}
@@ -38,12 +40,11 @@ func createTables() {
 		log.Fatalf("Failed to execute statements: %v\nQuery: %s\n", err, sqlStatements)
 	}
 	log.Println("All tables created successfully")
-
 }
 
 func createCategories() {
-	predefinedCategories := []struct{
-		Name 	string
+	predefinedCategories := []struct {
+		Name        string
 		Description string
 	}{
 		{"Technology", "Posts related to the latest technologies and trends"},
@@ -54,12 +55,11 @@ func createCategories() {
 		{"Travel", "Exploring the world and sharing travel experience"},
 	}
 	for _, category := range predefinedCategories {
-		_, err := DB.Exec(`INSERT OR IGNORE INTO categories (name, descrption)VALUE (?, ?)`,category.Name, category.Description)
+		_, err := DB.Exec(`INSERT OR IGNORE INTO categories (name, description) VALUES (?, ?)`, category.Name, category.Description)
 		if err != nil {
-			log.Printf("Error inserting category '%s': '%v'",category.Name, err)
+			log.Printf("Error inserting category '%s': '%v'", category.Name, err)
 		}
 	}
-	
 }
 
 func CleanupExpiredSession() {
