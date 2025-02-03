@@ -1,65 +1,45 @@
+{{ define "title" }}Home{{ end }}
+
 {{define "content"}}
 <h2>Forum Home Page</h2>
 <p>Welcome to the forum!</p>
-{{ if .Posts }} {{ range .Posts }}
-<div class="post">
-  <h2>{{ .Title }}</h2>
-  <p>
-    <strong>Posted by:</strong> {{ .Username }} | <strong>Category:</strong> {{
-    .Category }} | <strong>Created at:</strong> {{ .CreatedAt }}
-  </p>
-  <p>{{ .Content }}</p>
-  <div>
-    <button
-      id="like-post-{{ .PostID }}"
-      onclick="reactToPost('{{$.CurrentUserID}}',' {{.PostID}}', 'like')"
-    >
-      👍 Like (<span id="post-like-count-{{ .PostID }}">{{ .LikeCount }}</span>)
-    </button>
-    <button
-      id="dislike-post-{{ .PostID }}"
-      onclick="reactToPost('{{$.CurrentUserID}}', '{{.PostID}}', 'dislike')"
-    >
-      👎 Dislike (<span id="post-dislike-count-{{ .PostID }}"
-        >{{ .DislikeCount }}</span
-      >)
-    </button>
-  </div>
-  <h3>Comments</h3>
-  {{ if .Comments }} {{ range .Comments }}
-  <div class="comment">
-    <p><strong>{{ .Username }}</strong> ({{ .CreatedAt }}):</p>
-    <p>{{ .Content }}</p>
-    <button
-      id="like-comment-{{ .CommentID }}"
-      onclick="reactToComment('{{$.CurrentUserID}}', '{{.CommentID}}', 'like')"
-    >
-      👍 Like (<span id="comment-like-count-{{ .CommentID }}"
-        >{{ .LikeCount }}</span
-      >)
-    </button>
-    <button
-      id="dislike-comment-{{ .CommentID }}"
-      onclick="reactToComment('{{$.CurrentUserID}}', '{{.CommentID}}', 'dislike')"
-    >
-      👎 Dislike (<span id="comment-dislike-count-{{ .CommentID }}"
-        >{{ .DislikeCount }}</span
-      >)
-    </button>
-  </div>
-  {{end}} {{ else }}
-  <p>No comments yet. Be the first to comment!</p>
-  {{ end }}
 
-  <!-- Add Comment Form -->
-  <h3>Add a comment</h3>
-  <form method="POST" action="/comment/create">
-    <input type="hidden" name="post_id" value="{{ .PostID }}" />
-    <textarea name="content" rows="4" required></textarea>
-    <br />
-    <button type="submit">Submit</button>
-  </form>
-</div>
-{{ end }} {{ else }}
-<p>No posts to display.</p>
-{{ end }} {{ end }}
+
+{{ if .Posts }}
+    {{ range .Posts }}
+    <div class="post">
+        <h2>{{ .Title }}</h2>
+        <p><strong>Posted by:</strong> {{ .Username }} | <strong>Category:</strong> {{ .Category }} | <strong>Created at:</strong> {{ .CreatedAt }}</p>
+        <p>{{ .Content }}</p>
+        <div>
+            <button id="like-post-{{ .PostID }}" onclick="reactToPost({{$.CurrentUserID}}, {{.PostID}}, 'like')">👍 Like (<span id="post-like-count-{{ .PostID }}">{{ .LikeCount }}</span>)</button>
+            <button id="dislike-post-{{ .PostID }}" onclick="reactToPost({{$.CurrentUserID}}, {{.PostID}}, 'dislike')">👎 Dislike (<span id="post-dislike-count-{{ .PostID }}">{{ .DislikeCount }}</span>)</button>
+        </div>
+        <h3>Comments</h3>
+        {{ if .Comments }}
+            {{ range .Comments }}
+            <div class="comment">
+                <p><strong>{{ .Username }}</strong> ({{ .CreatedAt }}):</p>
+                <p>{{ .Content }}</p>
+                <button id="like-comment-{{ .CommentID }}" onclick="reactToComment({{$.CurrentUserID}}, {{.CommentID}}, 'like')">👍 Like (<span id="comment-like-count-{{ .CommentID }}">{{ .LikeCount }}</span>)</button>
+                <button id="dislike-comment-{{ .CommentID }}" onclick="reactToComment({{$.CurrentUserID}}, {{.CommentID}}, 'dislike')">👎 Dislike (<span id="comment-dislike-count-{{ .CommentID }}">{{ .DislikeCount }}</span>)</button>
+            </div>
+            {{end}}
+        {{ else }}
+            <p>No comments yet. Be the first to comment!</p>
+        {{ end }}
+
+        <!-- Add Comment Form -->
+        <h3>Add a comment</h3>
+        <form method="POST" action="/comment/create">
+            <input type="hidden" name="post_id" value="{{ .PostID }}">
+            <textarea name="content" rows="4" required></textarea>
+            <br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    {{ end }}
+{{ else }}
+    <p>No posts to display.</p>
+{{ end }}
+{{ end }}

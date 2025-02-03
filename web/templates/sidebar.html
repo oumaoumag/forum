@@ -1,0 +1,22 @@
+{{ define "sidebar" }}
+<h2>Filters</h2>
+<form method="GET" action="/">
+    <label for="category">Category:</label>
+    <select name="category" id="category">
+        <option value="">-- All --</option>
+        {{range .Categories}}
+        <option value="{{.Name}}">{{.Name}}</option>
+        {{end}}
+    </select>
+
+    {{ if .CurrentUserID }}
+    <label for="created">My Posts Only:</label>
+    <input type="checkbox" name="created" id="created" value="true">
+
+    <label for="liked">Posts I've Liked:</label>
+    <input type="checkbox" name="liked" id="liked" value="true">
+    {{ end }}
+
+    <button type="submit">Apply Filters</button>
+</form>
+{{ end }}

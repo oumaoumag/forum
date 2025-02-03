@@ -1,261 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Forum Community</title>
-    <link rel="stylesheet" href="/web/static/css/home.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/">
+    <link rel="stylesheet" href="static/css/style.css">
+    <title>Forum</title>
 </head>
-
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <a href="/" class="logo-link">
-                    <i class="fas fa-comments"></i>
-                    <h1>Forum Community</h1>
-                </a>
-            </div>
-
-            <!-- Search Bar -->
-            <div class="search-bar">
-                <div class="search-wrapper">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" placeholder="Search discussions..." class="form-input search-input" />
-                </div>
-            </div>
-
-            <!-- User Actions -->
-            <div class="header-actions">
-                {{if .IsLoggedIn}}
-                <div class="user-menu">
-                    <button class="btn primary-btn" id="create-post-btn">
-                        <i class="fas fa-plus"></i> New Post
-                    </button>
-                    <a href="/logout">
-                        <button class="btn secondary-btn" id="logout-btn">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </button>
-                    </a>
-                </div>
-                {{else}}
-                <div class="auth-buttons">
-                    <a href="/login">
-                        <button class="btn primary-btn" id="login-btn">
-                            <i class="fas fa-sign-in-alt"></i> Login
-                        </button>
-                    </a>
-                    <a href="/register">
-                        <button class="btn secondary-btn" id="register-btn">
-                            <i class="fas fa-user-plus"></i> Register
-                        </button>
-                    </a>
-                </div>
-                {{end}}
-            </div>
-        </div>
+    <header>
+        <h1>Welcome to the Forum</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/post/create">Create Post</a>
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+            <a>
+                <form action="/logout" method="POST">
+                    <button style="margin:0;padding:0;" type="submit">Logout</button>
+                </form>
+            </a>
+        </nav>
     </header>
-
-    <!-- Main Container -->
     <div class="container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="card sidebar-menu">
-                <nav>
-                    <ul class="main-nav">
-                        <li class="nav-item active" data-filter="all">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-home"></i> Home
-                            </a>
-                        </li>
-                        <li class="nav-item" data-filter="created">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-pencil-alt"></i> My Posts
-                            </a>
-                        </li>
-                        <li class="nav-item" data-filter="liked">
-                            <a href="#" class="nav-link">
-                                <i class="fas fa-heart"></i> Liked Posts
-                            </a>
-                        </li>
-                    </ul>
-
-                    <!-- Categories Section -->
-                    <div class="categories-section">
-                        <h3><i class="fas fa-tags"></i> Categories</h3>
-                        <ul class="categories-list">
-                            {{range .Categories}}
-                            <li class="category-item">
-                                <a href="#" class="category-link">
-                                    <span class="category-icon">🏷️</span>
-                                    {{.Name}}
-                                </a>
-                            </li>
-                            {{end}}
-                        </ul>
-                    </div>
-                </nav>
-            </div>
-        </div>
-
-        <!-- Content Area -->
-        <div class="content">
-            <!-- Create Post Modal -->
-            <div id="create-post-modal" class="modal" style="display: none">
-                {{if .IsLoggedIn}}
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2><i class="fas fa-edit"></i> Create New Post</h2>
-                        <button id="closeModal" class="close-btn">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <form id="create-post-form" action="/posts/create" method="POST" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <input type="text" name="title" placeholder="Write an engaging title..." required class="form-input" />
-                        </div>
-                        <div class="form-group">
-                            <textarea name="content" placeholder="Share your thoughts..." required class="form-textarea"></textarea>
-                        </div>
-                        <div class="form-group categories-grid">
-                            {{if len .Categories}}
-                            <label class="form-label">Select Categories:</label>
-                            <div class="categories-selection">
-                                {{range .Categories}}
-                                <div class="category-checkbox-item">
-                                    <input type="checkbox" name="categories[]" value="{{.CategoryID}}" id="category-{{.CategoryID}}" />
-                                    <label for="category-{{.CategoryID}}">{{.Name}}</label>
-                                </div>
-                                {{end}}
-                            </div>
-                            {{else}}
-                            <p class="no-categories">No categories available</p>
-                            {{end}}
-                        </div>
-                        <div class="form-group">
-                            <label for="image-upload" class="file-upload-label">
-                                <i class="fas fa-image"></i> Add Image (Max: 20MB)
-                            </label>
-                            <input type="file" id="image-upload" name="image" accept="image/*" class="file-input" />
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn primary-btn">
-                                <i class="fas fa-paper-plane"></i> Post
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                {{end}}
-            </div>
-
-            <!-- Posts Display -->
-            <div id="allPosts" class="posts-container">
-                {{if len .Posts}}
-                {{range .Posts}}
-                <div class="post-card" data-category="{{range .Categories}}{{.Name}},{{end}}">
-                    <div class="post-header">
-                        <div class="post-meta">
-                            <div class="author-info">
-                                <i class="fas fa-user-circle"></i>
-                                <span class="post-author">{{.Username}}</span>
-                            </div>
-                            <span class="post-date">
-                                <i class="far fa-clock"></i>
-                                {{.CreatedAt.Format "Jan 02, 2006 15:04"}}
-                            </span>
-                        </div>
-                        <h2 class="post-title">{{.Title}}</h2>
-                        <div class="post-categories">
-                            {{range .Categories}}
-                            <span class="category-tag">
-                                <i class="fas fa-tag"></i> {{.Name}}
-                            </span>
-                            {{end}}
-                        </div>
-                    </div>
-
-                    <div class="post-content">
-                        <p>{{.Content}}</p>
-                        {{if .ImageName}}
-                        <div class="post-image">
-                            <img src="../static/post_images/{{ .ImageName }}" alt="{{.Title}}" loading="lazy" />
-                        </div>
-                        {{end}}
-                    </div>
-
-                    <div class="post-footer">
-                        <div class="interaction-buttons">
-                            <a href="/post/like?post_id={{.PostID}}" class="interaction-btn {{if .IsLiked}}active{{end}}">
-                                <i class="fa-{{if .IsLiked}}solid{{else}}regular{{end}} fa-thumbs-up"></i>
-                                <span class="count">{{.LikesCount}}</span>
-                            </a>
-
-                            <a href="/post/dislike?post_id={{.PostID}}" class="interaction-btn {{if .IsDisliked}}active{{end}}">
-                                <i class="fa-{{if .IsDisliked}}solid{{else}}regular{{end}} fa-thumbs-down"></i>
-                                <span class="count">{{.DislikesCount}}</span>
-                            </a>
-
-                            {{if $.IsLoggedIn}}
-                            <button class="interaction-btn comment-button" data-post-id="{{.PostID}}">
-                                <i class="far fa-comment"></i>
-                                <span class="count">{{.CommentsCount}}</span>
-                            </button>
-                            {{else}}
-                            <a href="/login" class="interaction-btn">
-                                <i class="far fa-comment"></i>
-                                <span class="count">{{.CommentsCount}}</span>
-                            </a>
-                            {{end}}
-                        </div>
-
-                        <!-- Comment Form -->
-                        <div class="comment-form-container" id="comment-form-{{.PostID}}" style="display: none;">
-                            <form action="/comment" method="POST" class="comment-form" onsubmit="return validateCommentForm(event)">
-                                <input type="hidden" name="post_id" value="{{.PostID}}">
-                                <textarea name="comment" class="comment-input" placeholder="Share your thoughts..." required></textarea>
-                                <div class="form-actions">
-                                    <button type="submit" class="btn primary-btn">
-                                        <i class="fas fa-reply"></i> Comment
-                                    </button>
-                                    <button type="button" class="btn secondary-btn cancel-comment">
-                                        <i class="fas fa-times"></i> Cancel
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                {{end}}
-                {{else}}
-                <div class="empty-state">
-                    <i class="fas fa-comments"></i>
-                    <h3>No posts yet</h3>
-                    <p>Be the first to start a discussion!</p>
-                </div>
-                {{end}}
-            </div>
-        </div>
-
-        <!-- Trending Sidebar -->
-        <div class="trending-sidebar">
-            <div class="card trending-topics">
-                <h3><i class="fas fa-fire"></i> Trending Topics</h3>
-                <ul class="trending-list">
-                    {{range .Trends}}
-                    <li class="trending-item">
-                        <div class="trending-info">
-                            <span class="trending-category">{{.CategoryName}}</span>
-                            <span class="trending-count">{{.Count}} posts</span>
-                        </div>
-                        <div class="trending-progress"></div>
-                    </li>
-                    {{end}}
-                </ul>
-            </div>
-        </div>
+        <aside>
+            {{ template "sidebar" . }}
+        </aside>
+        <main>
+            {{ block "content" . }}{{ end }}
+        </main>
     </div>
 </body>
+<script src="static/js/main.js"></script>
 </html>
