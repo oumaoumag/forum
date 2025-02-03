@@ -8,7 +8,7 @@ type Comment struct {
 	UserID       int       `db:"user_id"`
 	Content      string    `db:"content"`
 	Username     string    `db:"user_name"`
-	CreatedAt    time.Time `db:"created_at"`
+	CreatedAt    string    `db:"created_at"`
 	UpdatedAt    time.Time `db:"updated_at"`
 	LikeCount    int
 	DislikeCount int

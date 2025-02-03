@@ -78,7 +78,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var post models.Post
 		var created_at time.Time
-		err := rows.Scan(&post.PostID, &post.Title, &post.Content, &post.Username, &post.UserID, &post.Category, &created_at,  &post.LikeCount, &post.DislikeCount, &post.CommentCount)
+		err := rows.Scan(&post.PostID, &post.Title, &post.Content, &post.Username, &post.UserID, &post.Category, &created_at, &post.LikeCount, &post.DislikeCount, &post.CommentCount)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -104,11 +104,14 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		var comments []models.Comment
 		for commentRows.Next() {
 			var comment models.Comment
-			err := commentRows.Scan(&comment.CommentID, &comment.PostID, &comment.Content, &comment.Username, &comment.UserID, &comment.CreatedAt, &comment.LikeCount, &comment.DislikeCount)
+			var created_at time.Time
+
+			err := commentRows.Scan(&comment.CommentID, &comment.PostID, &comment.Content, &comment.Username, &comment.UserID, &created_at, &comment.LikeCount, &comment.DislikeCount)
 			if err != nil {
 				http.Error(w, "Error scanning comments", http.StatusInternalServerError)
 				return
 			}
+			comment.CreatedAt = utils.FormatTime(created_at)
 			comments = append(comments, comment)
 		}
 		commentRows.Close()
