@@ -32,7 +32,7 @@ func main() {
 		Handler: mux,
 	}
 
-	log.Println("Server started at http://localhost:8080")
+	log.Println("Server started at http://192.168.89.189:8080")
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
