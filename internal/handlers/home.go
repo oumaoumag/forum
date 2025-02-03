@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"time"
 
 	"forum/internal/auth"
 	"forum/internal/db"
@@ -59,6 +60,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		for i := 1; i < len(conditions); i++ {
 			query += " AND " + conditions[i]
 		}
+
 	}
 
 	// Append order by clause
@@ -75,11 +77,13 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	var posts []models.Post
 	for rows.Next() {
 		var post models.Post
-		err := rows.Scan(&post.PostID, &post.Title, &post.Content, &post.Username, &post.UserID, &post.Category, &post.CreatedAt, &post.LikeCount, &post.DislikeCount, &post.CommentCount)
+		var created_at time.Time
+		err := rows.Scan(&post.PostID, &post.Title, &post.Content, &post.Username, &post.UserID, &post.Category, &created_at,  &post.LikeCount, &post.DislikeCount, &post.CommentCount)
 		if err != nil {
-			http.Error(w, "Error scanning posts", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		post.CreatedAt = utils.FormatTime(created_at)
 
 		// Fetch comments for each post
 		commentQuery := `
