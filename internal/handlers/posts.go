@@ -7,9 +7,13 @@ import (
 
 	"forum/internal/auth"
 	"forum/internal/db"
+	"forum/internal/models"
+	"forum/internal/utils"
 )
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
+	currentUserID := auth.GetCurrentUserID(r)
+
 	// Retrieve the user ID from the context
 	userID, ok := auth.GetUserID(r)
 	if !ok || userID == "" {
@@ -18,40 +22,28 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == http.MethodGet {
-		// Fethc categoreies to display in the form
-		rows, err := db.DB.Query("SELECT category_id, name FROM categories")
-		if err != nil {
-			http.Error(w, "Unable to fetch categories", http.StatusInternalServerError)
-			return
-		}
-		defer rows.Close()
+		// Fetch categories to display in the form
+		categories := utils.FetchCategories()
 
-		var categoreies []struct {
-			categoryID int
-			Name       string
+		data := struct {
+			CurrentUserID int
+			Categories []models.Categories
+		}{
+			CurrentUserID: currentUserID,
+			Categories: categories,
 		}
-
-		for rows.Next() {
-			var category struct {
-				categoryID int
-				Name       string
-			}
-			if err := rows.Scan(&category.categoryID, &category.Name); err != nil {
-				http.Error(w, "Error scanning categories", http.StatusInternalServerError)
-				return
-			}
-			categoreies = append(categoreies, category)
-		}
-
+		
 		// Render the form
-		tmpl, err := template.ParseFiles("web/templates/layout.html", "web/templates/post.html")
+		tmpl, err := template.ParseFiles("web/templates/layout.html", "web/templates/post.html", "web/templates/sidebar.html")
 		if err != nil {
-			http.Error(w, "Unable to fetch categories", http.StatusInternalServerError)
+			http.Error(w, "Unable to load template", http.StatusInternalServerError)
 			return
 		}
-		tmpl.Execute(w, categoreies)
+		if err = tmpl.Execute(w, data); err != nil {
+			http.Error(w, "Error rendering template", http.StatusInternalServerError)
+		}
 	} else if r.Method == http.MethodPost {
-		// Parse from input
+		// Parse form input
 		err := r.ParseForm()
 		if err != nil {
 			http.Error(w, "Invalid form data", http.StatusBadRequest)
