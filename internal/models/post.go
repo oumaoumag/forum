@@ -9,9 +9,10 @@ type Post struct {
 	Content      string
 	Username     string
 	Category     string
-	CreatedAt    time.Time
+	CreatedAt    string
 	UpdatedAt    time.Time
 	Comments     []Comment
 	LikeCount    int
 	DislikeCount int
+	CommentCount int
 }

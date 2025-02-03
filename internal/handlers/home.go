@@ -1,17 +1,18 @@
 package handlers
 
 import (
+	"html/template"
+	"log"
+	"net/http"
+	"time"
+
 	"forum/internal/auth"
 	"forum/internal/db"
 	"forum/internal/models"
 	"forum/internal/utils"
-	"html/template"
-	"log"
-	"net/http"
 )
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-
 	currentUserID := auth.GetCurrentUserID(r)
 
 	// Get filter query parameters
@@ -21,12 +22,13 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Build base query
 	query := `
-		SELECT p.post_id, p.title, p.content, u.username, u.user_id, c.name AS category, p.created_at,
-		       (SELECT COUNT(*) FROM likes WHERE post_id = p.post_id AND comment_id IS NULL AND like_type = 'like') AS like_count,
-		       (SELECT COUNT(*) FROM likes WHERE post_id = p.post_id AND comment_id IS NULL AND like_type = 'dislike') AS dislike_count
-		FROM posts p
-		JOIN users u ON p.user_id = u.user_id
-		JOIN categories c ON p.category_id = c.category_id`
+    SELECT p.post_id, p.title, p.content, u.username, u.user_id, c.name AS category, p.created_at,
+        (SELECT COUNT(*) FROM likes WHERE post_id = p.post_id AND comment_id IS NULL AND like_type = 'like') AS like_count,
+        (SELECT COUNT(*) FROM likes WHERE post_id = p.post_id AND comment_id IS NULL AND like_type = 'dislike') AS dislike_count,
+        (SELECT COUNT(*) FROM comments WHERE post_id = p.post_id) AS total_comments
+    FROM posts p
+    JOIN users u ON p.user_id = u.user_id
+    JOIN categories c ON p.category_id = c.category_id`
 
 	// Prepare a slice for query conditions and parameters
 	conditions := []string{}
@@ -58,6 +60,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		for i := 1; i < len(conditions); i++ {
 			query += " AND " + conditions[i]
 		}
+
 	}
 
 	// Append order by clause
@@ -74,11 +77,13 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	var posts []models.Post
 	for rows.Next() {
 		var post models.Post
-		err := rows.Scan(&post.PostID, &post.Title, &post.Content, &post.Username, &post.UserID, &post.Category, &post.CreatedAt, &post.LikeCount, &post.DislikeCount)
+		var created_at time.Time
+		err := rows.Scan(&post.PostID, &post.Title, &post.Content, &post.Username, &post.UserID, &post.Category, &created_at, &post.LikeCount, &post.DislikeCount, &post.CommentCount)
 		if err != nil {
-			http.Error(w, "Error scanning posts", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		post.CreatedAt = utils.FormatTime(created_at)
 
 		// Fetch comments for each post
 		commentQuery := `
@@ -99,11 +104,14 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		var comments []models.Comment
 		for commentRows.Next() {
 			var comment models.Comment
-			err := commentRows.Scan(&comment.CommentID, &comment.PostID, &comment.Content, &comment.Username, &comment.UserID, &comment.CreatedAt, &comment.LikeCount, &comment.DislikeCount)
+			var created_at time.Time
+
+			err := commentRows.Scan(&comment.CommentID, &comment.PostID, &comment.Content, &comment.Username, &comment.UserID, &created_at, &comment.LikeCount, &comment.DislikeCount)
 			if err != nil {
 				http.Error(w, "Error scanning comments", http.StatusInternalServerError)
 				return
 			}
+			comment.CreatedAt = utils.FormatTime(created_at)
 			comments = append(comments, comment)
 		}
 		commentRows.Close()
@@ -117,11 +125,11 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Posts         []models.Post
 		CurrentUserID int
-		Categories []models.Categories
+		Categories    []models.Categories
 	}{
 		Posts:         posts,
 		CurrentUserID: currentUserID,
-		Categories: categories,
+		Categories:    categories,
 	}
 
 	tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/home.html", "web/templates/sidebar.html"))
