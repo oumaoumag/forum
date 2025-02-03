@@ -14,4 +14,5 @@ type Post struct {
 	Comments     []Comment
 	LikeCount    int
 	DislikeCount int
+	CommentCount int
 }

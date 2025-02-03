@@ -25,7 +25,9 @@
         >{{ .DislikeCount }}</span
       >)
     </button>
-    <button onclick="OpenComments(('{{.PostID}}'))">Comments</button>
+    <button onclick="OpenComments(('{{.PostID}}'))">
+      Comments {{.CommentCount}}
+    </button>
   </div>
   <div class="close" id="{{.PostID}}">
     {{ if .Comments }} {{ range .Comments }}
