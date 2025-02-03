@@ -1,12 +1,11 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
 	"forum/internal/auth"
 	"forum/internal/db"
 	"forum/internal/handlers"
+	"log"
+	"net/http"
 )
 
 func main() {
@@ -15,7 +14,7 @@ func main() {
 	go db.ScheduleSessionCleanup()
 
 	mux := http.NewServeMux()
-
+	
 	fs := http.FileServer(http.Dir("web/static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
@@ -25,7 +24,7 @@ func main() {
 	mux.Handle("/register", auth.SessionMiddleware(auth.RedirectIfAuthenticated(http.HandlerFunc(handlers.RegisterHandler))))
 	mux.Handle("/post/create", auth.SessionMiddleware(auth.RequireAuth(http.HandlerFunc(handlers.CreatePostHandler))))
 	mux.Handle("/comment/create", auth.SessionMiddleware(auth.RequireAuth(http.HandlerFunc(handlers.CreateCommentHandler))))
-	// mux.Handle("/like", auth.SessionMiddleware(auth.RequireAuth(http.HandlerFunc(handlers.LikeHandler))))
+	mux.Handle("/like", auth.SessionMiddleware(auth.RequireAuth(http.HandlerFunc(handlers.LikeHandler))))
 	mux.Handle("/logout", auth.SessionMiddleware(auth.RequireAuth(http.HandlerFunc(handlers.LogoutHandler))))
 
 	server := http.Server{

@@ -20,7 +20,6 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
-	
 	postID, err := strconv.Atoi(r.FormValue("post_id"))
 	if err != nil {
 		http.Error(w, "Invalid post ID", http.StatusBadRequest)
@@ -29,15 +28,16 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 
 	content := r.FormValue("content")
 	if content == "" {
-		http.Error(w, "content cannot be empty", http.StatusBadRequest)
+		http.Error(w, "Content cannot be empty", http.StatusBadRequest)
 		return
 	}
 
 	// Insert comment into database
-	_, err = db.DB.Exec("Insert INTO comments (post_id, user_id, content) VALUES (?, ?, ?)", postID, userID, content)
+	_, err = db.DB.Exec("INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)", postID, userID, content)
 	if err != nil {
 		http.Error(w, "Failed to save comment", http.StatusInternalServerError)
 		return
 	}
+
 	http.Redirect(w, r, fmt.Sprintf("/post/%d", postID), http.StatusSeeOther)
 }

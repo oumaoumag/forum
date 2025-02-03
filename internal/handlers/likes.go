@@ -47,6 +47,9 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Failed to insert like", http.StatusInternalServerError)
 			return
 		}
+		// w.WriteHeader(http.StatusCreated)
+		// json.NewEncoder(w).Encode(map[string]string{"message": "Reaction added"})
+		// return
 	} else if err == nil {
 		// If the user already reacted
 		if existingLikeType == req.LikeType {

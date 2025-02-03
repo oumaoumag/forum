@@ -2,14 +2,13 @@ package handlers
 
 import (
 	"database/sql"
+	"forum/internal/db"
+	"forum/internal/utils"
 	"html/template"
 	"log"
 	"net/http"
 	"strings"
 	"time"
-
-	"forum/internal/db"
-	"forum/internal/utils"
 
 	"github.com/google/uuid"
 
@@ -19,7 +18,7 @@ import (
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		// Render the login page
-		tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/login.html"))
+		tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/login.html", "web/templates/sidebar.html"))
 		err := tmpl.Execute(w, nil)
 		if err != nil {
 			log.Println(err)
@@ -43,18 +42,31 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Check if the user exist in the database
+		// Check if the user exists in the database
 		var storedHash, userID string
 		query := `SELECT user_id, password FROM users WHERE email = ? OR username = ?`
 		err := db.DB.QueryRow(query, identifier, identifier).Scan(&userID, &storedHash)
 		if err == sql.ErrNoRows {
 			http.Error(w, "Invalid email/username or password", http.StatusUnauthorized)
 			return
+		} else if err != nil {
+			http.Error(w, "Server error", http.StatusInternalServerError)
+			log.Printf("Database query error: %v", err)
+			return
 		}
 
 		// Compare the provided password with the stored hash
 		if err := bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(password)); err != nil {
 			http.Error(w, "Invalid email/username or password", http.StatusUnauthorized)
+			return
+		}
+
+		// Delete any existing session for the user (enforcing single-session authentication)
+		deleteQuery := `DELETE FROM sessions WHERE user_id = ?`
+		_, err = db.DB.Exec(deleteQuery, userID)
+		if err != nil {
+			http.Error(w, "Failed to clear old sessions", http.StatusInternalServerError)
+			log.Printf("Database delete error: %v", err)
 			return
 		}
 
@@ -73,11 +85,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, &http.Cookie{
 			Name:     "session_id",
 			Value:    sessionID,
+			Expires:  expiration,
 			Path:     "/",
 			HttpOnly: true, // Prevent JavaScript access
 		})
 
-		// Redeirect to the homepage or dashboard
+		// Redirect to the home page
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 }
@@ -85,7 +98,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		// Render the register page
-		tmpl := template.Must(template.ParseFiles("../web/templates/layout.html", "../web/templates/register.html"))
+		tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/register.html", "web/templates/sidebar.html"))
 		err := tmpl.Execute(w, nil)
 		if err != nil {
 			log.Println(err)
@@ -93,7 +106,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else if r.Method == http.MethodPost {
-		// Parse from data
+		// Parse form data
 		if err := r.ParseForm(); err != nil {
 			http.Error(w, "Failed to parse form", http.StatusBadRequest)
 			return
@@ -110,7 +123,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if !utils.ValidatePassword(password) {
-			http.Error(w, "Password must be at least 6 characters long, contain one uppercase, lowercase, digit and specialist character", http.StatusBadRequest)
+			http.Error(w, "Password must be at least 6 characters long, contain one uppercase, lowercase, digit and specials character", http.StatusBadRequest)
 			return
 		}
 
@@ -120,11 +133,11 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		err := db.DB.QueryRow(query, email, username).Scan(&exists)
 		if err != nil && err != sql.ErrNoRows {
 			http.Error(w, "Server error", http.StatusInternalServerError)
-			log.Printf("Database query error: %v\n", err)
+			log.Printf("Database qeuery error: %v\n", err)
 			return
 		}
 		if exists {
-			http.Error(w, "Email or Usernamer already in use", http.StatusBadRequest)
+			http.Error(w, "Email or Username already in use", http.StatusBadRequest)
 			return
 		}
 
@@ -137,14 +150,15 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Insert the new user into the database
-		insertQuery := `INSERT INTO usrs (username, email, password) VALUES(?, ?,?)`
+		insertQuery := `INSERT INTO users (username, email, password) VALUES (?, ?, ?)`
 		_, err = db.DB.Exec(insertQuery, username, email, hashedPassword)
 		if err != nil {
 			http.Error(w, "Failed to register user", http.StatusInternalServerError)
 			log.Printf("Database insert error: %v\n", err)
 			return
 		}
-		// Redirect the login page
+
+		// Redirect to the login page
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 }
@@ -158,11 +172,11 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the session cookie
 	cookie, err := r.Cookie("session_id")
 	if err == nil && cookie.Value != "" {
-		// Delete the session from the database
+		// Delete the session from database
 		query := `DELETE FROM sessions WHERE session_id = ?`
 		_, err := db.DB.Exec(query, cookie.Value)
 		if err != nil {
-			log.Printf("Error deleting sessions: %v", err)
+			log.Printf("Error deleting session: %v", err)
 		}
 	}
 
@@ -170,11 +184,11 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_id",
 		Value:    "",
-		Expires:  time.Now().Add(-time.Hour), // Set expriry in the past
+		Expires:  time.Now().Add(-time.Hour), // Set expiry in the past
 		Path:     "/",
 		HttpOnly: true,
 	})
 
-	// Redirect to the login page
+	// Redirect to login page
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
