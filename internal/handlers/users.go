@@ -2,13 +2,14 @@ package handlers
 
 import (
 	"database/sql"
-	"forum/internal/db"
-	"forum/internal/utils"
 	"html/template"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"forum/internal/db"
+	"forum/internal/utils"
 
 	"github.com/google/uuid"
 
@@ -116,10 +117,15 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		username := strings.TrimSpace(r.FormValue("username"))
 		email := strings.TrimSpace(r.FormValue("email"))
 		password := r.FormValue("password")
+		confirmPass := r.FormValue("confirmpassword")
 
 		// Validate form data
 		if username == "" || email == "" || password == "" {
 			http.Error(w, "Please fill in all fields", http.StatusBadRequest)
+			return
+		}
+		if password != confirmPass {
+			http.Error(w, "Password and confirm password do not match", http.StatusBadRequest)
 			return
 		}
 		if !utils.ValidatePassword(password) {
