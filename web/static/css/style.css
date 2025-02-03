@@ -1,103 +1,236 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #6a11cb, #2575fc);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            color: #333;
-        }
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f8f9fA;
+    margin: 0;
+    padding: 0;
+}
 
-        .container {
-            background: #fff;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
+/* Header */
+header {
+    background-color: #004d7a;
+    color: white;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
 
-        header h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            color: #333;
-        }
+header h1 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
 
-        header p {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 1.5rem;
-        }
+nav {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
 
-        .input-box {
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
+nav a {
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
 
-        .input-box label {
-            display: block;
-            font-size: 0.9rem;
-            color: #555;
-            margin-bottom: 0.5rem;
-        }
+nav a:hover {
+    background-color: white;
+    color: #004d7a;
+}
 
-        .input-box input {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
+nav form {
+    display: inline;
+}
 
-        .input-box input:focus {
-            border-color: #6a11cb;
-            outline: none;
-        }
+nav button {
+    background: none;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
 
-        .input-box input::placeholder {
-            color: #999;
-        }
+nav button:hover {
+    background-color: white;
+    color: #004d7a;
+}
 
-        .input-box i {
-            position: absolute;
-            margin-top: 0.8rem;
-            margin-left: 0.8rem;
-            color: #999;
-        }
+.container {
+    display: flex;
+    max-width: 1200px;
+    margin: auto;
+    padding: 2rem;
+}
 
-        .btn {
-            width: 100%;
-            padding: 0.8rem;
-            background: #6a11cb;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
+.sidebar {
+    width: 250px;
+    padding: 1rem;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
 
-        .btn:hover {
-            background: #2575fc;
-        }
+.post-actions {
+    display: flex;
+    gap: 10px;
+}
 
-        .register-link {
-            margin-top: 1.5rem;
-            font-size: 0.9rem;
-            color: #666;
-        }
+.comments-container {
+    display: none;
+    padding-top: 10px;
+}
 
-        .register-link a {
-            color: #6a11cb;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
+.hidden {
+    display: none;
+}
 
-        .register-link a:hover {
-            color: #2575fc;
-        }
-    
+button {
+    cursor: pointer;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    background-color: #004d7a;
+    color: white;
+}
+
+button:hover {
+    background-color: #00334e;
+}
+
+/* Main Content */
+main {
+    max-width: 800px;
+    margin: 2rem auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+main h2 {
+    margin-bottom: 1.5rem;
+    color: #004d7a;
+}
+
+p {
+    margin-bottom: 1rem;
+}
+
+/* Post Styling */
+.post {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.post h2 {
+    margin-bottom: 0.5rem;
+    color: #004d7a;
+}
+
+.post p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+
+.post h3 {
+    margin-top: 1rem;
+    color: #004d7a;
+}
+
+/* Comments */
+.comment {
+    margin-top: 1rem;
+    border-left: 3px solid #004d7a;
+    padding-left: 1rem;
+    color: #555;
+}
+
+.comment p {
+    margin: 0.5rem 0;
+}
+
+/* Forms */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+form label {
+    font-weight: bold;
+}
+
+form input,
+form textarea,
+form select,
+form button {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+form input:focus,
+form textarea:focus,
+form select:focus {
+    outline: none;
+    border-color: #004d7a;
+    box-shadow: 0 0 5px rgba(0, 77, 122, 0.4);
+}
+
+form button {
+    background-color: #004d7a;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form button:hover {
+    background-color: #00334e;
+}
+
+/* Footer (Optional) */
+footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #004d7a;
+    color: white;
+    margin-top: 2rem;
+    border-radius: 10px 10px 0 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    nav {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    main {
+        padding: 1.5rem;
+    }
+
+    form input,
+    form textarea,
+    form select,
+    form button {
+        font-size: 0.9rem;
+    }
+}
+
