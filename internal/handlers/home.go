@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"forum/internal/auth"
@@ -22,17 +23,22 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Build base query
 	query := `
-    SELECT p.post_id, p.title, p.content, u.username, u.user_id, c.name AS category, p.created_at,
+    SELECT p.post_id, p.title, p.content, u.username, u.user_id,
+		COALESCE(GROUP_CONCAT(DISTINCT c.name), '') AS categories,
+		p.created_at,
         (SELECT COUNT(*) FROM likes WHERE post_id = p.post_id AND comment_id IS NULL AND like_type = 'like') AS like_count,
         (SELECT COUNT(*) FROM likes WHERE post_id = p.post_id AND comment_id IS NULL AND like_type = 'dislike') AS dislike_count,
         (SELECT COUNT(*) FROM comments WHERE post_id = p.post_id) AS total_comments
     FROM posts p
     JOIN users u ON p.user_id = u.user_id
-    JOIN categories c ON p.category_id = c.category_id`
+	LEFT JOIN post_categories pc ON p.post_id = pc.post_id
+	LEFT JOIN categories c ON pc.category_id = c.category_id
+    LEFT JOIN likes l ON p.post_id = l.post_id`
 
 	// Prepare a slice for query conditions and parameters
 	conditions := []string{}
 	params := []interface{}{}
+	joins := []string{}
 
 	// 1. Filter by category if set
 	if categoryFilter != "" {
@@ -49,22 +55,26 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	// 3. Filter by liked posts (only for registered users)
 	// We need to join the likes table to filter by posts that the user liked.
 	if likedFilter == "true" && currentUserID != 0 {
-		query += " JOIN likes l ON p.post_id = l.post_id "
-		conditions = append(conditions, "l.user_id = ?")
+		joins = append(joins, `
+        INNER JOIN likes lk 
+        ON p.post_id = lk.post_id 
+        AND lk.user_id = ? 
+        AND lk.comment_id IS NULL
+    `)
 		params = append(params, currentUserID)
+	}
+
+	if len(joins) > 0 {
+		query += " " + strings.Join(joins, " ")
 	}
 
 	// Append conditions if any
 	if len(conditions) > 0 {
-		query += " WHERE " + conditions[0]
-		for i := 1; i < len(conditions); i++ {
-			query += " AND " + conditions[i]
-		}
-
+		query += " WHERE " + strings.Join(conditions, " AND ")
 	}
 
 	// Append order by clause
-	query += " ORDER BY p.created_at DESC"
+	query += " GROUP BY p.post_id ORDER BY p.created_at DESC"
 
 	rows, err := db.DB.Query(query, params...)
 	if err != nil {
@@ -75,13 +85,20 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	var posts []models.Post
+	
 	for rows.Next() {
+		var rawCategories string
 		var post models.Post
 		var created_at time.Time
-		err := rows.Scan(&post.PostID, &post.Title, &post.Content, &post.Username, &post.UserID, &post.Category, &created_at, &post.LikeCount, &post.DislikeCount, &post.CommentCount)
+		err := rows.Scan(&post.PostID, &post.Title, &post.Content, &post.Username, &post.UserID, &rawCategories, &created_at, &post.LikeCount, &post.DislikeCount, &post.CommentCount)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
+		}
+		if rawCategories != "" {
+			post.Categories = strings.Split(rawCategories, ", ")
+		} else {
+			post.Categories = []string{}
 		}
 		post.CreatedAt = utils.FormatTime(created_at)
 

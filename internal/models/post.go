@@ -8,7 +8,7 @@ type Post struct {
 	Title        string
 	Content      string
 	Username     string
-	Category     string
+	Categories   []string
 	CreatedAt    string
 	UpdatedAt    time.Time
 	Comments     []Comment
