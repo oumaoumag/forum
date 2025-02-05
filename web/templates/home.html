@@ -6,8 +6,13 @@
 <div class="post">
   <h2>{{ .Title }}</h2>
   <p>
-    <strong>Posted by:</strong> {{ .Username }} | <strong>Category:</strong> {{
-    .Category }} | <strong>Created </strong> {{ .CreatedAt }}
+    <strong>Posted by:</strong> {{ .Username }} | <strong>Categories:</strong>
+    {{ range $index, $cat := .Categories }}
+      {{ if $index }}, {{ end }}
+      <a href="/?category={{ $cat }}">{{ $cat }}</a>
+      {{ else }}
+        Uncategorized
+      {{ end }} | <strong>Created </strong> {{ .CreatedAt }}
   </p>
   <p>{{ .Content }}</p>
   <div>

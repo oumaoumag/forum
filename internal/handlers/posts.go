@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -27,12 +28,12 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 
 		data := struct {
 			CurrentUserID int
-			Categories []models.Categories
+			Categories    []models.Categories
 		}{
 			CurrentUserID: currentUserID,
-			Categories: categories,
+			Categories:    categories,
 		}
-		
+
 		// Render the form
 		tmpl, err := template.ParseFiles("web/templates/layout.html", "web/templates/post.html", "web/templates/sidebar.html")
 		if err != nil {
@@ -52,29 +53,44 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 
 		title := r.FormValue("title")
 		content := r.FormValue("content")
-		categoryID := r.FormValue("category")
+		categories := r.Form["category"]
 
 		// Validate inputs
-		if title == "" || content == "" || categoryID == "" {
+		if title == "" || content == "" || len(categories) == 0 {
 			http.Error(w, "All fields are required", http.StatusBadRequest)
-			return
-		}
-
-		// Convert categoryID to integer
-		categoryIDInt, err := strconv.Atoi(categoryID)
-		if err != nil {
-			http.Error(w, "Invalid category", http.StatusBadRequest)
 			return
 		}
 
 		// Insert post into the database
 		query := `
-			INSERT INTO posts (user_id, category_id, title, content)
-			VALUES (?, ?, ?, ?)`
-		_, err = db.DB.Exec(query, userID, categoryIDInt, title, content)
+			INSERT INTO posts (user_id, title, content)
+			VALUES (?, ?, ?)`
+		result, err := db.DB.Exec(query, userID, title, content)
 		if err != nil {
+			log.Println(err)
 			http.Error(w, "Unable to create post", http.StatusInternalServerError)
 			return
+		}
+
+		// Get the newly created post's ID
+		postID, err := result.LastInsertId()
+		if err != nil {
+			http.Error(w, "Failed to retrieve post ID", http.StatusInternalServerError)
+			return
+		}
+
+		// Insert each selected category into post_categories
+		for _, catIDStr := range categories {
+			catID, err := strconv.Atoi(catIDStr)
+			if err != nil {
+				http.Error(w, "Invalid category ID: "+catIDStr, http.StatusBadRequest)
+				return
+			}
+			_, err = db.DB.Exec("INSERT INTO post_categories (post_id, category_id) VALUES (?, ?)", postID, catID)
+			if err != nil {
+				http.Error(w, "Failed to link category to post: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
 		}
 
 		// Redirect to homepage or posts page
