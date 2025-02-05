@@ -9,23 +9,16 @@ import (
 	"testing"
 
 	"forum/internal/auth"
-	"forum/internal/db"
-
 	_ "github.com/mattn/go-sqlite3" // SQLite driver
 )
 
 // setupTestDB initializes an in-memory SQLite database for testing
 func setupTestDB(t *testing.T) *sql.DB {
-//	var database *sql.DB
-
 	// Open an in-memory SQLite databse
-	database, err := sql.Open("sqlite3", ":memory:")
+	database, err := sql.Open("qlite3", ":memory:")
 	if err != nil {
-		t.Fatalf("Failed to open in-memory database: %v", err)
+		t.Fatal("Failrd to open in-memory database: %v", err)
 	}
-
-	// set up global db insrance
-	db.DB = database
 
 	// create tables
 	queries := []string{
@@ -56,26 +49,25 @@ func setupTestDB(t *testing.T) *sql.DB {
 		content TEXT NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		FOREIGN KEY (user_id) REFERENCES testUsers(user_id) ON DELETE CASCADE,
+		FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
 		FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE
 		);`,
 
 		`CREATE TABLE IF NOT EXISTS comments (
 				comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
 				post_id INTEGER NOT NULL,
-				user_id INTEGER NOT NULL,
 				content TEXT NOT NULL,
 				created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 				updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 				FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
-				FOREIGN KEY (user_id) REFERENCES testUsers(user_id) ON DELETE CASCADE
+				FOREIGN KEY (user_if) REFERENCES users(user_id) ON DELETE CASCADE,
 );`,
 }
 
 for _,query := range queries {
 	_, err = database.Exec(query)
 	if err != nil {
-		t.Fatalf("Failed to create table: %v", err)
+		t.Fatal("Failed to create table: %v", err)
 }
 }
 return database
@@ -84,9 +76,9 @@ return database
 // insertTestData inserts sample data into the database for testing
 func insertTestData(t *testing.T, db *sql.DB) {
 	// Isert a test user
-	_, err := db.Exec(`INSERT INTO testUsers (username, email, password) VALUES (?,?,?)`, "testuser", "test@example.com", "password123")
+	_, err := db.Exec(`INSERT INTO users (username, email, password) VALUES (?,?.?)`, "testuser", "test@example.com", "password123")
 	if err != nil {
-		t.Fatalf("Failed to insert test user: %v", err)
+		t.Fatalf("Failed to insert test user: %V", err)
 	}
 
 	// Insert a test cstegory
@@ -110,33 +102,33 @@ func TestCreateCommentHandler(t *testing.T) {
 	// Insert test data
 	insertTestData(t, db)
 
+	// // Replace the global DB instance with the test database
+	// db.DB = db
+
 	// Test cases
 	tests := []struct {
-		name           string
-		method         string
-		userID         string
-		postID         string
-		content        string
+		name string
+		method string
+		userID string
+		postID string
+		content string
 		expectedStatus int
-		expectComment  bool // New field to indicate if a comment should exist
-	}{
+	}{ 
 		{
-			name:           "Valid request",
-			method:         http.MethodPost,
-			userID:         "1",
-			postID:         "1",
-			content:        "This is a test comment",
+			name: "Valid request",
+			method: http.MethodPost,
+			userID: "1", 
+			postID: "1",
+			content: "This is a test comment",
 			expectedStatus: http.StatusSeeOther,
-			expectComment:  true, // Comment should be inserted
 		},
 		{
-			name:           "Invalid method",
-			method:         http.MethodGet,
-			userID:         "1",
-			postID:         "1",
-			content:        "This is a test comment",
+			name: "Invalid method",
+			method: http.MethodGet,
+			userID: "1",
+			postID: "1",
+			 content:        "This is a test comment",
 			expectedStatus: http.StatusMethodNotAllowed,
-			expectComment:  false,
 		},
 		{
 			name:           "Unauthorized user",
@@ -145,7 +137,6 @@ func TestCreateCommentHandler(t *testing.T) {
 			postID:         "1",
 			content:        "This is a test comment",
 			expectedStatus: http.StatusSeeOther,
-			expectComment:  false, // No comment should be inserted
 		},
 		{
 			name:           "Invalid post ID",
@@ -154,7 +145,6 @@ func TestCreateCommentHandler(t *testing.T) {
 			postID:         "invalid",
 			content:        "This is a test comment",
 			expectedStatus: http.StatusBadRequest,
-			expectComment:  false,
 		},
 		{
 			name:           "Empty content",
@@ -163,7 +153,6 @@ func TestCreateCommentHandler(t *testing.T) {
 			postID:         "1",
 			content:        "",
 			expectedStatus: http.StatusBadRequest,
-			expectComment:  false,
 		},
 	}
 
@@ -174,34 +163,34 @@ func TestCreateCommentHandler(t *testing.T) {
 			form.Add("post_id", tt.postID)
 			form.Add("content", tt.content)
 
-			// Create a request with the form data
+			// 	Create a request with the form data
 			req, err := http.NewRequest(tt.method, "/comment", strings.NewReader(form.Encode()))
+
 			if err != nil {
-				t.Fatalf("Failed to create request: %v", err)
-			}
+				t.Fatal(err)
+		}
 			req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
-			// Mock authentication (only if userID is provided)
+			// Mock the authentication middleware
 			if tt.userID != "" {
 				req = auth.SetUserID(req, tt.userID)
 			}
 
-			// Record the response
+			// Create a ResponseRecoder to record thr response
 			rr := httptest.NewRecorder()
+
+			// Call the handler 
 			CreateCommentHandler(rr, req)
 
-			// Check the status code
+			// Check the statud code
 			if rr.Code != tt.expectedStatus {
-				t.Errorf("expected status %d, got %d", tt.expectedStatus, rr.Code)
+			t.Errorf("expected status %d, got %d", tt.expectedStatus, rr.Code)
 			}
 
-			// Check for comment insertion ONLY if expectComment is true
-			if tt.expectComment {
+			// For valid requests, verify that the comment was inserted into the database
+			if tt.expectedStatus == http.StatusSeeOther {
 				var commentCount int
-				err := db.QueryRow(
-					"SELECT COUNT(*) FROM comments WHERE post_id = ? AND user_id = ? AND content = ?",
-					tt.postID, tt.userID, tt.content,
-				).Scan(&commentCount)
+				err := db.QueryRow("SELECT COUNT(*) FROM comments WHERE post_id = ? AND user_id = ? AND content = ?", tt.postID, tt.userID, tt.content).Scan(&commentCount)
 				if err != nil {
 					t.Fatalf("Failed to query database: %v", err)
 				}
@@ -209,6 +198,6 @@ func TestCreateCommentHandler(t *testing.T) {
 					t.Errorf("expected 1 comment, got %d", commentCount)
 				}
 			}
-		})
-	}
+	})
+}
 }
