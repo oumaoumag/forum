@@ -90,7 +90,6 @@ func UserIDKey() contextKey {
 	return userIDKey
 }
 
-
 // SetUserId sets the userID in the request context for testing purposes.
 func SetUserID(r *http.Request, userId string) *http.Request {
 	ctx := context.WithValue(r.Context(), userIDKey, userId)
