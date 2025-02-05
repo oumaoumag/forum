@@ -10,16 +10,20 @@
 
 ```bash
 
-   docker build -t name -f docker/Dockerfile .
+   docker build -t <image name> -f docker/Dockerfile .
    ```
 
   
-## Running the Docker Container
+## Running the Docker Container in the server
 
 
 
  ```bash
-docker run -it -p 8080:8080 name
+docker run -it -p 8080:8080 <name of the image>
 
    ```
-   
+## To Run in the container
+
+```bash
+
+docker container run -d -p 8080:8080 --name forum <name of container>
