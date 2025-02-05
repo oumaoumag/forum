@@ -15,9 +15,9 @@ import (
 // setupTestDB initializes an in-memory SQLite database for testing
 func setupTestDB(t *testing.T) *sql.DB {
 	// Open an in-memory SQLite databse
-	database, err := sql.Open("qlite3", ":memory:")
+	database, err := sql.Open("sqlite3", ":memory:")
 	if err != nil {
-		t.Fatal("Failrd to open in-memory database: %v", err)
+		t.Fatalf("Failed to open in-memory database: %v", err)
 	}
 
 	// create tables
@@ -49,25 +49,26 @@ func setupTestDB(t *testing.T) *sql.DB {
 		content TEXT NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+		FOREIGN KEY (user_id) REFERENCES testUsers(user_id) ON DELETE CASCADE,
 		FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE
 		);`,
 
 		`CREATE TABLE IF NOT EXISTS comments (
 				comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
 				post_id INTEGER NOT NULL,
+				user_id INTEGER NOT NULL,
 				content TEXT NOT NULL,
 				created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 				updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 				FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
-				FOREIGN KEY (user_if) REFERENCES users(user_id) ON DELETE CASCADE,
+				FOREIGN KEY (user_id) REFERENCES testUsers(user_id) ON DELETE CASCADE
 );`,
 }
 
 for _,query := range queries {
 	_, err = database.Exec(query)
 	if err != nil {
-		t.Fatal("Failed to create table: %v", err)
+		t.Fatalf("Failed to create table: %v", err)
 }
 }
 return database
@@ -76,9 +77,9 @@ return database
 // insertTestData inserts sample data into the database for testing
 func insertTestData(t *testing.T, db *sql.DB) {
 	// Isert a test user
-	_, err := db.Exec(`INSERT INTO users (username, email, password) VALUES (?,?.?)`, "testuser", "test@example.com", "password123")
+	_, err := db.Exec(`INSERT INTO testUsers (username, email, password) VALUES (?,?,?)`, "testuser", "test@example.com", "password123")
 	if err != nil {
-		t.Fatalf("Failed to insert test user: %V", err)
+		t.Fatalf("Failed to insert test user: %v", err)
 	}
 
 	// Insert a test cstegory
