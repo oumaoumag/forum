@@ -8,7 +8,6 @@ import (
 
 	"forum/internal/db"
 
-	"forum/internal/db"
 )
 
 type contextKey string

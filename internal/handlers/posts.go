@@ -37,17 +37,17 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		// Render the form
 		tmpl, err := template.ParseFiles("web/templates/layout.html", "web/templates/post.html", "web/templates/sidebar.html")
 		if err != nil {
-			utils.DisplayError(w, http.StatusInternalServerError, "Unable to load template")
+			http.Error(w, "Unable to load template", http.StatusInternalServerError)
 			return
 		}
 		if err = tmpl.Execute(w, data); err != nil {
-			utils.DisplayError(w, http.StatusInternalServerError, "Error rendering template")
+			http.Error(w, "Error rendering template", http.StatusInternalServerError)
 		}
 	} else if r.Method == http.MethodPost {
 		// Parse form input
 		err := r.ParseForm()
 		if err != nil {
-			utils.DisplayError(w, http.StatusBadRequest, "Invalid form data")
+			http.Error(w, "Invalid form data", http.StatusBadRequest)
 			return
 		}
 
@@ -56,38 +56,19 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		categories := r.Form["category"]
 
 		// Validate inputs
-<<<<<<< HEAD
 		if title == "" || content == "" || len(categories) == 0 {
 			http.Error(w, "All fields are required", http.StatusBadRequest)
 			return
 		}
 
-=======
-		if title == "" || content == "" || categoryID == "" {
-			utils.DisplayError(w, http.StatusBadRequest, "All fields are required")
-			return
-		}
-
-		// Convert categoryID to integer
-		categoryIDInt, err := strconv.Atoi(categoryID)
-		if err != nil {
-			utils.DisplayError(w, http.StatusBadRequest, "Invalid category")
-			return
-		}
-
->>>>>>> 0e829e1 (enhanced error handling for comments.go,likes.go,posts.go and users.go)
 		// Insert post into the database
 		query := `
 			INSERT INTO posts (user_id, title, content)
 			VALUES (?, ?, ?)`
 		result, err := db.DB.Exec(query, userID, title, content)
 		if err != nil {
-<<<<<<< HEAD
 			log.Println(err)
 			http.Error(w, "Unable to create post", http.StatusInternalServerError)
-=======
-			utils.DisplayError(w, http.StatusInternalServerError, "Unable to create post")
->>>>>>> 0e829e1 (enhanced error handling for comments.go,likes.go,posts.go and users.go)
 			return
 		}
 
