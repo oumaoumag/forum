@@ -35,25 +35,20 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	LEFT JOIN categories c ON pc.category_id = c.category_id
     LEFT JOIN likes l ON p.post_id = l.post_id`
 
-	// Prepare a slice for query conditions and parameters
 	conditions := []string{}
 	params := []interface{}{}
 	joins := []string{}
 
-	// 1. Filter by category if set
 	if categoryFilter != "" {
 		conditions = append(conditions, "c.name = ?")
 		params = append(params, categoryFilter)
 	}
 
-	// 2. Filter by created posts (only for registered users)
 	if createdFilter == "true" && currentUserID != 0 {
 		conditions = append(conditions, "p.user_id = ?")
 		params = append(params, currentUserID)
 	}
 
-	// 3. Filter by liked posts (only for registered users)
-	// We need to join the likes table to filter by posts that the user liked.
 	if likedFilter == "true" && currentUserID != 0 {
 		joins = append(joins, `
         INNER JOIN likes lk 
@@ -64,22 +59,19 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		params = append(params, currentUserID)
 	}
 
-	if len(joins) > 0 {
-		query += " " + strings.Join(joins, " ")
-	}
-
-	// Append conditions if any
 	if len(conditions) > 0 {
-		query += " WHERE " + strings.Join(conditions, " AND ")
+		query += " WHERE " + conditions[0]
+		for i := 1; i < len(conditions); i++ {
+			query += " AND " + conditions[i]
+		}
 	}
 
-	// Append order by clause
-	query += " GROUP BY p.post_id ORDER BY p.created_at DESC"
+	query += " ORDER BY p.created_at DESC"
 
 	rows, err := db.DB.Query(query, params...)
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "Unable to fetch posts", http.StatusInternalServerError)
+		utils.DisplayError(w, http.StatusInternalServerError, "Unable to fetch posts") // Enhanced error handling
 		return
 	}
 	defer rows.Close()
@@ -92,7 +84,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		var created_at time.Time
 		err := rows.Scan(&post.PostID, &post.Title, &post.Content, &post.Username, &post.UserID, &rawCategories, &created_at, &post.LikeCount, &post.DislikeCount, &post.CommentCount)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Println(err)
+			utils.DisplayError(w, http.StatusInternalServerError, "Error retrieving post data") // Enhanced error handling
 			return
 		}
 		if rawCategories != "" {
@@ -102,7 +95,6 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		post.CreatedAt = utils.FormatTime(created_at)
 
-		// Fetch comments for each post
 		commentQuery := `
 			SELECT c.comment_id, c.post_id, c.content, u.username, u.user_id, c.created_at,
 				(SELECT COUNT(*) FROM likes WHERE comment_id = c.comment_id AND like_type = 'like') AS like_count,
@@ -114,7 +106,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		commentRows, err := db.DB.Query(commentQuery, post.PostID)
 		if err != nil {
 			log.Println(err)
-			http.Error(w, "Unable to fetch comments", http.StatusInternalServerError)
+			utils.DisplayError(w, http.StatusInternalServerError, "Unable to fetch comments") 
 			return
 		}
 
@@ -125,7 +117,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 			err := commentRows.Scan(&comment.CommentID, &comment.PostID, &comment.Content, &comment.Username, &comment.UserID, &created_at, &comment.LikeCount, &comment.DislikeCount)
 			if err != nil {
-				http.Error(w, "Error scanning comments", http.StatusInternalServerError)
+				log.Println(err)
+				utils.DisplayError(w, http.StatusInternalServerError, "Error scanning comments")
 				return
 			}
 			comment.CreatedAt = utils.FormatTime(created_at)
@@ -154,7 +147,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	err = tmpl.Execute(w, data)
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "Unable to render template", http.StatusInternalServerError)
+		utils.DisplayError(w, http.StatusInternalServerError, "Unable to render template")
 		return
 	}
 }
