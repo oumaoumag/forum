@@ -15,7 +15,7 @@ func DisplayError(w http.ResponseWriter, code int, message string) {
 		Message: message,
 	}
 
-	tmpl, err := template.ParseFiles("web/template/error.html")
+	tmpl, err := template.ParseFiles("web/templates/error.html")
 	if err != nil {
 		log.Printf("Error loading template: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
