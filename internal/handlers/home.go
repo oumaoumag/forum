@@ -35,20 +35,25 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	LEFT JOIN categories c ON pc.category_id = c.category_id
     LEFT JOIN likes l ON p.post_id = l.post_id`
 
+	// Prepare a slice for query conditions and parameters
 	conditions := []string{}
 	params := []interface{}{}
 	joins := []string{}
 
+	// 1. Filter by category if set
 	if categoryFilter != "" {
 		conditions = append(conditions, "c.name = ?")
 		params = append(params, categoryFilter)
 	}
 
+	// 2. Filter by created posts (only for registered users)
 	if createdFilter == "true" && currentUserID != 0 {
 		conditions = append(conditions, "p.user_id = ?")
 		params = append(params, currentUserID)
 	}
 
+	// 3. Filter by liked posts (only for registered users)
+	// We need to join the likes table to filter by posts that the user liked.
 	if likedFilter == "true" && currentUserID != 0 {
 		joins = append(joins, `
         INNER JOIN likes lk 
@@ -59,14 +64,17 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		params = append(params, currentUserID)
 	}
 
-	if len(conditions) > 0 {
-		query += " WHERE " + conditions[0]
-		for i := 1; i < len(conditions); i++ {
-			query += " AND " + conditions[i]
-		}
+	if len(joins) > 0 {
+		query += " " + strings.Join(joins, " ")
 	}
 
-	query += " ORDER BY p.created_at DESC"
+	// Append conditions if any
+	if len(conditions) > 0 {
+		query += " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	// Append order by clause
+	query += " GROUP BY p.post_id ORDER BY p.created_at DESC"
 
 	rows, err := db.DB.Query(query, params...)
 	if err != nil {
@@ -95,6 +103,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		post.CreatedAt = utils.FormatTime(created_at)
 
+		// Fetch comments for each post
 		commentQuery := `
 			SELECT c.comment_id, c.post_id, c.content, u.username, u.user_id, c.created_at,
 				(SELECT COUNT(*) FROM likes WHERE comment_id = c.comment_id AND like_type = 'like') AS like_count,
@@ -105,6 +114,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 			ORDER BY c.created_at ASC`
 		commentRows, err := db.DB.Query(commentQuery, post.PostID)
 		if err != nil {
+			log.Println(err)
 			log.Println(err)
 			utils.DisplayError(w, http.StatusInternalServerError, "Unable to fetch comments") 
 			return
