@@ -12,189 +12,143 @@ import (
 	"forum/internal/utils"
 
 	"github.com/google/uuid"
-
 	"golang.org/x/crypto/bcrypt"
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		// Render the login page
 		tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/login.html", "web/templates/sidebar.html"))
-		err := tmpl.Execute(w, nil)
-		if err != nil {
+		if err := tmpl.Execute(w, nil); err != nil {
 			log.Println(err)
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
+			utils.DisplayError(w, http.StatusInternalServerError, "Internal server error")
 		}
-	} else if r.Method == http.MethodPost {
-		// Parse form data
+		return
+	}
+
+	if r.Method == http.MethodPost {
 		if err := r.ParseForm(); err != nil {
-			http.Error(w, "Unable to process form", http.StatusBadRequest)
+			utils.DisplayError(w, http.StatusBadRequest, "Unable to process form")
 			return
 		}
 
-		// Extract form fields
-		identifier := r.FormValue("identifier") // Can be email or username
-		password := r.FormValue("password")
-
-		// Validate inputs
+		identifier, password := r.FormValue("identifier"), r.FormValue("password")
 		if identifier == "" || password == "" {
-			http.Error(w, "All fields are required", http.StatusBadRequest)
+			utils.DisplayError(w, http.StatusBadRequest, "All fields are required")
 			return
 		}
 
-		// Check if the user exists in the database
 		var storedHash, userID string
 		query := `SELECT user_id, password FROM users WHERE email = ? OR username = ?`
 		err := db.DB.QueryRow(query, identifier, identifier).Scan(&userID, &storedHash)
 		if err == sql.ErrNoRows {
-			http.Error(w, "Invalid email/username or password", http.StatusUnauthorized)
+			utils.DisplayError(w, http.StatusUnauthorized, "Invalid email/username or password")
 			return
 		} else if err != nil {
-			http.Error(w, "Server error", http.StatusInternalServerError)
 			log.Printf("Database query error: %v", err)
+			utils.DisplayError(w, http.StatusInternalServerError, "Server error")
 			return
 		}
 
-		// Compare the provided password with the stored hash
 		if err := bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(password)); err != nil {
-			http.Error(w, "Invalid email/username or password", http.StatusUnauthorized)
+			utils.DisplayError(w, http.StatusUnauthorized, "Invalid email/username or password")
 			return
 		}
 
-		// Delete any existing session for the user (enforcing single-session authentication)
-		deleteQuery := `DELETE FROM sessions WHERE user_id = ?`
-		_, err = db.DB.Exec(deleteQuery, userID)
+		_, err = db.DB.Exec(`DELETE FROM sessions WHERE user_id = ?`, userID)
 		if err != nil {
-			http.Error(w, "Failed to clear old sessions", http.StatusInternalServerError)
 			log.Printf("Database delete error: %v", err)
+			utils.DisplayError(w, http.StatusInternalServerError, "Failed to clear old sessions")
 			return
 		}
 
-		// Create a session
 		sessionID := uuid.New().String()
-		expiration := time.Now().Add(24 * time.Hour) // 1-day session expiration
-		insertQuery := `INSERT INTO sessions (session_id, user_id, expires_at) VALUES (?, ?, ?)`
-		_, err = db.DB.Exec(insertQuery, sessionID, userID, expiration)
+		expiration := time.Now().Add(24 * time.Hour)
+		_, err = db.DB.Exec(`INSERT INTO sessions (session_id, user_id, expires_at) VALUES (?, ?, ?)`, sessionID, userID, expiration)
 		if err != nil {
-			http.Error(w, "Failed to create session", http.StatusInternalServerError)
 			log.Printf("Database insert error: %v", err)
+			utils.DisplayError(w, http.StatusInternalServerError, "Failed to create session")
 			return
 		}
 
-		// Set a session cookie
-		http.SetCookie(w, &http.Cookie{
-			Name:     "session_id",
-			Value:    sessionID,
-			Expires:  expiration,
-			Path:     "/",
-			HttpOnly: true, // Prevent JavaScript access
-		})
-
-		// Redirect to the home page
+		http.SetCookie(w, &http.Cookie{Name: "session_id", Value: sessionID, Expires: expiration, Path: "/", HttpOnly: true})
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-		// Render the register page
 		tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/register.html", "web/templates/sidebar.html"))
-		err := tmpl.Execute(w, nil)
-		if err != nil {
+		if err := tmpl.Execute(w, nil); err != nil {
 			log.Println(err)
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
+			utils.DisplayError(w, http.StatusInternalServerError, "Internal server error")
 		}
-	} else if r.Method == http.MethodPost {
-		// Parse form data
+		return
+	}
+
+	if r.Method == http.MethodPost {
 		if err := r.ParseForm(); err != nil {
-			http.Error(w, "Failed to parse form", http.StatusBadRequest)
+			utils.DisplayError(w, http.StatusBadRequest, "Failed to parse form")
 			return
 		}
 
-		// Extract form fields
-		username := strings.TrimSpace(r.FormValue("username"))
-		email := strings.TrimSpace(r.FormValue("email"))
-		password := r.FormValue("password")
-		confirmPass := r.FormValue("confirmpassword")
-
-		// Validate form data
+		username, email, password, confirmPass := strings.TrimSpace(r.FormValue("username")), strings.TrimSpace(r.FormValue("email")), r.FormValue("password"), r.FormValue("confirmpassword")
 		if username == "" || email == "" || password == "" {
-			http.Error(w, "Please fill in all fields", http.StatusBadRequest)
+			utils.DisplayError(w, http.StatusBadRequest, "Please fill in all fields")
 			return
 		}
 		if password != confirmPass {
-			http.Error(w, "Password and confirm password do not match", http.StatusBadRequest)
+			utils.DisplayError(w, http.StatusBadRequest, "Password and confirm password do not match")
 			return
 		}
 		if !utils.ValidatePassword(password) {
-			http.Error(w, "Password must be at least 6 characters long, contain one uppercase, lowercase, digit and specials character", http.StatusBadRequest)
+			utils.DisplayError(w, http.StatusBadRequest, "Password must be at least 6 characters long, contain one uppercase, lowercase, digit, and special character")
 			return
 		}
 
-		// Check if email or username already exists
 		var exists bool
-		query := `SELECT EXISTS(SELECT 1 FROM users WHERE email = ? OR username = ?)`
-		err := db.DB.QueryRow(query, email, username).Scan(&exists)
+		err := db.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE email = ? OR username = ?)`, email, username).Scan(&exists)
 		if err != nil && err != sql.ErrNoRows {
-			http.Error(w, "Server error", http.StatusInternalServerError)
-			log.Printf("Database qeuery error: %v\n", err)
+			log.Printf("Database query error: %v", err)
+			utils.DisplayError(w, http.StatusInternalServerError, "Server error")
 			return
 		}
 		if exists {
-			http.Error(w, "Email or Username already in use", http.StatusBadRequest)
+			utils.DisplayError(w, http.StatusBadRequest, "Email or Username already in use")
 			return
 		}
 
-		// Hash the password
 		hashedPassword, err := utils.HashPassword(password)
 		if err != nil {
-			http.Error(w, "Server error", http.StatusInternalServerError)
-			log.Printf("Password hashing error: %v\n", err)
+			log.Printf("Password hashing error: %v", err)
+			utils.DisplayError(w, http.StatusInternalServerError, "Server error")
 			return
 		}
 
-		// Insert the new user into the database
-		insertQuery := `INSERT INTO users (username, email, password) VALUES (?, ?, ?)`
-		_, err = db.DB.Exec(insertQuery, username, email, hashedPassword)
+		_, err = db.DB.Exec(`INSERT INTO users (username, email, password) VALUES (?, ?, ?)`, username, email, hashedPassword)
 		if err != nil {
-			http.Error(w, "Failed to register user", http.StatusInternalServerError)
-			log.Printf("Database insert error: %v\n", err)
+			log.Printf("Database insert error: %v", err)
+			utils.DisplayError(w, http.StatusInternalServerError, "Failed to register user")
 			return
 		}
 
-		// Redirect to the login page
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		utils.DisplayError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		return
 	}
 
-	// Get the session cookie
 	cookie, err := r.Cookie("session_id")
 	if err == nil && cookie.Value != "" {
-		// Delete the session from database
-		query := `DELETE FROM sessions WHERE session_id = ?`
-		_, err := db.DB.Exec(query, cookie.Value)
+		_, err = db.DB.Exec(`DELETE FROM sessions WHERE session_id = ?`, cookie.Value)
 		if err != nil {
 			log.Printf("Error deleting session: %v", err)
 		}
 	}
 
-	// Clear the session cookie regardless of db operation success
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_id",
-		Value:    "",
-		Expires:  time.Now().Add(-time.Hour), // Set expiry in the past
-		Path:     "/",
-		HttpOnly: true,
-	})
-
-	// Redirect to login page
+	http.SetCookie(w, &http.Cookie{Name: "session_id", Value: "", Expires: time.Now().Add(-time.Hour), Path: "/", HttpOnly: true})
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

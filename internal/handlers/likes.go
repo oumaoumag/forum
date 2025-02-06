@@ -7,30 +7,31 @@ import (
 
 	"forum/internal/db"
 	"forum/internal/models"
+	"forum/internal/utils" 
 )
 
 // LikeHandler handles liking and disliking of posts and comments
 func LikeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		utils.DisplayError(w, http.StatusMethodNotAllowed, "Invalid request method")
 		return
 	}
 
 	// Parse JSON request
 	var req models.LikeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		utils.DisplayError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
 	// Validate input
 	if req.UserID == 0 || req.LikeType == "" || (req.PostID == nil && req.CommentID == nil) {
-		http.Error(w, "Missing required fields", http.StatusBadRequest)
+		utils.DisplayError(w, http.StatusBadRequest, "Missing required fields")
 		return
 	}
 
 	if req.LikeType != "like" && req.LikeType != "dislike" {
-		http.Error(w, "Invalid like type", http.StatusBadRequest)
+		utils.DisplayError(w, http.StatusBadRequest, "Invalid like type")
 		return
 	}
 
@@ -44,12 +45,9 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 		insertQuery := `INSERT INTO likes (user_id, post_id, comment_id, like_type) VALUES (?, ?, ?, ?)`
 		_, err = db.DB.Exec(insertQuery, req.UserID, req.PostID, req.CommentID, req.LikeType)
 		if err != nil {
-			http.Error(w, "Failed to insert like", http.StatusInternalServerError)
+			utils.DisplayError(w, http.StatusInternalServerError, "Failed to insert like")
 			return
 		}
-		// w.WriteHeader(http.StatusCreated)
-		// json.NewEncoder(w).Encode(map[string]string{"message": "Reaction added"})
-		// return
 	} else if err == nil {
 		// If the user already reacted
 		if existingLikeType == req.LikeType {
@@ -57,7 +55,7 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 			deleteQuery := `DELETE FROM likes WHERE user_id = ? AND post_id IS ? AND comment_id IS ?`
 			_, err = db.DB.Exec(deleteQuery, req.UserID, req.PostID, req.CommentID)
 			if err != nil {
-				http.Error(w, "Failed to remove like", http.StatusInternalServerError)
+				utils.DisplayError(w, http.StatusInternalServerError, "Failed to remove like")
 				return
 			}
 		} else {
@@ -65,12 +63,12 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 			updateQuery := `UPDATE likes SET like_type = ? WHERE user_id = ? AND post_id IS ? AND comment_id IS ?`
 			_, err = db.DB.Exec(updateQuery, req.LikeType, req.UserID, req.PostID, req.CommentID)
 			if err != nil {
-				http.Error(w, "Failed to toggle reaction", http.StatusInternalServerError)
+				utils.DisplayError(w, http.StatusInternalServerError, "Failed to toggle reaction")
 				return
 			}
 		}
 	} else {
-		http.Error(w, "Database error", http.StatusInternalServerError)
+		utils.DisplayError(w, http.StatusInternalServerError, "Database error")
 		return
 	}
 
@@ -83,7 +81,7 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 		WHERE post_id IS ? AND comment_id IS ?`
 	err = db.DB.QueryRow(countQuery, req.PostID, req.CommentID).Scan(&likes, &dislikes)
 	if err != nil {
-		http.Error(w, "Failed to fetch updated counts", http.StatusInternalServerError)
+		utils.DisplayError(w, http.StatusInternalServerError, "Failed to fetch updated counts")
 		return
 	}
 
