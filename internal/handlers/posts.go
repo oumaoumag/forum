@@ -17,7 +17,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Retrieve the user ID from the context
 	userID, ok := auth.GetUserID(r)
-	if !ok || userID == "" {
+	if !ok || userID == "" || userID == " " {
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
@@ -59,6 +59,9 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		if title == "" || content == "" || len(categories) == 0 {
 			http.Error(w, "All fields are required", http.StatusBadRequest)
 			return
+		}
+		if title == " " || content == " "{
+			http.Error(w, "Tittle or Content cannot be spaces", http.StatusBadRequest)
 		}
 
 		// Insert post into the database
