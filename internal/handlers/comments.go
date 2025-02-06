@@ -15,11 +15,14 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// retive userID from the request context
 	userID, ok := auth.GetUserID(r)
 	if !ok || userID == "" {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
+
+	// Parse form data
 	postID, err := strconv.Atoi(r.FormValue("post_id"))
 	if err != nil {
 		http.Error(w, "Invalid post ID", http.StatusBadRequest)
