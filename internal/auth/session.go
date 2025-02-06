@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"forum/internal/db"
+
+	"forum/internal/db"
 )
 
 type contextKey string
@@ -83,4 +85,7 @@ func IsAuthenticated(r *http.Request) bool {
 func SetUserID(r *http.Request, userId string) *http.Request {
 	ctx := context.WithValue(r.Context(), userIDKey, userId)
 	return r.WithContext(ctx)
+}
+func UserIDKey() contextKey {
+	return userIDKey
 }
