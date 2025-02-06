@@ -3,10 +3,10 @@ package auth
 import (
 	"context"
 	"database/sql"
-	"forum/internal/db"
-	"log"
 	"net/http"
 	"time"
+
+	"forum/internal/db"
 )
 
 type contextKey string
@@ -60,7 +60,6 @@ func RequireAuth(next http.Handler) http.Handler {
 func RedirectIfAuthenticated(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Context().Value(userIDKey)
-		log.Println(userID)
 		if userID != nil {
 			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return
