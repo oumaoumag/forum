@@ -32,7 +32,7 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	content := r.FormValue("content")
-	if content == "" {
+	if content == "" || content == " " {
 		utils.DisplayError(w, http.StatusBadRequest, "Content cannot be empty")
 		return
 	}
