@@ -21,7 +21,11 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
     backdrop-filter: blur(10px);
+    min-width: 300px;
+    max-width: 500px;
+    width: 50%;
 }
+
 
 .error-message h2 {
     color: #d9534f;
