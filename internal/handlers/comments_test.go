@@ -14,6 +14,8 @@ import (
 
 // setupTestDB initializes an in-memory SQLite database for testing
 func setupTestDB(t *testing.T) *sql.DB {
+//	var database *sql.DB
+
 	// Open an in-memory SQLite databse
 	database, err := sql.Open("sqlite3", ":memory:")
 	if err != nil {
