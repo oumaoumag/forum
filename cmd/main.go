@@ -1,20 +1,25 @@
 package main
 
 import (
+	"log"
+	"net/http"
+	"time"
+
 	"forum/internal/auth"
 	"forum/internal/db"
 	"forum/internal/handlers"
-	"log"
-	"net/http"
 )
 
 func main() {
 	// Initialize the database
-	db.Init()
-	go db.ScheduleSessionCleanup()
+	if err := db.Init("./forum.db"); err != nil {
+		log.Println("error:", err)
+	}
+	
+	go db.ScheduleSessionCleanup(1*time.Hour, db.CleanupExpiredSessions)
 
 	mux := http.NewServeMux()
-	
+
 	fs := http.FileServer(http.Dir("web/static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 

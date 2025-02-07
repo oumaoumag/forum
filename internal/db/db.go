@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -12,46 +13,50 @@ import (
 
 var DB *sql.DB // Global variable to hold the database connection
 
-// Init initializes the database connection and creates the necessary tables.
-func Init() {
+// Init initializes the database and returns any error encountered.
+func Init(dbPath string) error {
 	var err error
-	DB, err = sql.Open("sqlite3", "./forum.db")
+	DB, err = sql.Open("sqlite3", dbPath)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v\n", err)
+		return fmt.Errorf("failed to connect to database: %v", err)
 	}
-	// defer DB.Close()
 
-	createTables()
-	createCategories()
+	if err = createTables(); err != nil {
+		return fmt.Errorf("failed to create tables: %v", err)
+	}
+
+	if err = createCategories(); err != nil {
+		return fmt.Errorf("failed to create categories: %v", err)
+	}
+
+	return nil
 }
 
-// createTables reads SQL statements from a file and executes them to set up the database schema.
-func createTables() {
+// createTables executes the schema.sql file and returns any error.
+func createTables() error {
 	sqlFile, err := os.Open("internal/db/schema.sql")
 	if err != nil {
-		log.Fatalf("Failed to open schema file: %v\n", err)
+		return fmt.Errorf("failed to open schema file: %v", err)
 	}
 	defer sqlFile.Close()
 
 	sqlBytes, err := io.ReadAll(sqlFile)
 	if err != nil {
-		log.Fatalf("Failed to read schema file: %v\n", err)
+		return fmt.Errorf("failed to read schema file: %v", err)
 	}
-
-	sqlStatements := string(sqlBytes)
 
 	// Execute the SQL statements. If an error occurs, log it and terminate the program.
-	if _, err := DB.Exec(sqlStatements); err != nil {
-		log.Fatalf("Failed to execute statements: %v\nQuery: %s\n", err, sqlStatements)
+	if _, err := DB.Exec(string(sqlBytes)); err != nil {
+		return fmt.Errorf("failed to execute schema: %v", err)
 	}
 
-	log.Println("All tables created successfully.")
+	return nil
 }
 
-func createCategories() {
-	predefinedCategories := []struct {
-		Name        string
-		Description string
+// createCategories inserts predefined categories, returns error on failure.
+func createCategories() error {
+	categories := []struct {
+		Name, Description string
 	}{
 		{"Technology", "Posts related to the latest technology and trends"},
 		{"Health", "Discussions about health, fitness, and well-being"},
@@ -61,27 +66,31 @@ func createCategories() {
 		{"Travel", "Exploring the world, sharing travel experiences"},
 	}
 
-	for _, category := range predefinedCategories {
-		_, err := DB.Exec(`INSERT OR IGNORE INTO categories (name, description) VALUES (?, ?)`, category.Name, category.Description)
+	for _, c := range categories {
+		_, err := DB.Exec(`INSERT OR IGNORE INTO categories (name, description) VALUES (?, ?)`, c.Name, c.Description)
 		if err != nil {
-			log.Printf("Error inserting category '%s': '%v'", category.Name, err)
+			return fmt.Errorf("error inserting category '%s': '%v'", c.Name, err)
 		}
 	}
+	return nil
 }
 
-func CleanupExpiredSessions() {
+// CleanupExpiredSessions deletes sessions older than 24 hours.
+func CleanupExpiredSessions() error {
 	query := `DELETE FROM sessions WHERE expires_at < ?`
 	_, err := DB.Exec(query, time.Now().Add(-24*time.Hour)) // Allocating 24-hour session duration
-	if err != nil {
-		log.Printf("Error cleaning up sessions: %v", err)
-	}
+	
+	return err
 }
 
-func ScheduleSessionCleanup() {
-	ticker := time.NewTicker(1 * time.Hour) // Set to clean up expired sessions every hour
+// ScheduleSessionCleanup starts a ticker to periodically clean up sessions. 
+func ScheduleSessionCleanup(interval time.Duration, cleanupFunc func() error) {
+	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
 	for range ticker.C {
-		CleanupExpiredSessions()
+		if err := cleanupFunc(); err != nil {
+			log.Printf("error: session cleanup failed: %v", err)
+		}
 	}
 }
