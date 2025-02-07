@@ -1,35 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <base href="/">
-    <link rel="stylesheet" href="static/css/style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link rel="stylesheet" href="static/css/style.css" />
     <title>Forum</title>
-</head>
-<body>
+  </head>
+  <body>
     <header>
-        <h1>Welcome to the Forum</h1>
-        <nav>
-            <a href="/">Home</a>
-            <a href="/post/create">Create Post</a>
-            <a href="/login">Login</a>
-            <a href="/register">Register</a>
-            <a>
-                <form action="/logout" method="POST">
-                    <button style="margin:0;padding:0;" type="submit">Logout</button>
-                </form>
-            </a>
-        </nav>
+      <h1>Welcome to the Forum</h1>
+      <nav>
+        <a href="/">Home</a>
+        {{ if $.CurrentUserID }}
+
+        <a href="/post/create">Create Post</a>
+        <a>
+          <form action="/logout" method="POST">
+            <button style="margin: 0; padding: 0" type="submit">Logout</button>
+          </form>
+        </a>
+        {{else}}
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+        {{end}}
+      </nav>
     </header>
     <div class="container">
-        <aside>
-            {{ template "sidebar" . }}
-        </aside>
-        <main>
-            {{ block "content" . }}{{ end }}
-        </main>
+      <aside>{{ template "sidebar" . }}</aside>
+      <main>{{ block "content" . }}{{ end }}</main>
     </div>
-</body>
-<script src="static/js/main.js"></script>
+  </body>
+  <script src="static/js/main.js"></script>
 </html>
