@@ -79,11 +79,11 @@ func createCategories() error {
 func CleanupExpiredSessions() error {
 	query := `DELETE FROM sessions WHERE expires_at < ?`
 	_, err := DB.Exec(query, time.Now().Add(-24*time.Hour)) // Allocating 24-hour session duration
-	
+
 	return err
 }
 
-// ScheduleSessionCleanup starts a ticker to periodically clean up sessions. 
+// ScheduleSessionCleanup starts a ticker to periodically clean up sessions.
 func ScheduleSessionCleanup(interval time.Duration, cleanupFunc func() error) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
@@ -93,4 +93,15 @@ func ScheduleSessionCleanup(interval time.Duration, cleanupFunc func() error) {
 			log.Printf("error: session cleanup failed: %v", err)
 		}
 	}
+}
+
+func GetUser(id int) (string, error) {
+	var name string
+
+	qry := `
+	SELECT username FROM users WHERE user_id = ?
+	`
+	err := DB.QueryRow(qry, id).Scan(&name)
+
+	return name, err
 }

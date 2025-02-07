@@ -85,7 +85,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	var posts []models.Post
-	
+
 	for rows.Next() {
 		var rawCategories string
 		var post models.Post
@@ -116,7 +116,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println(err)
 			log.Println(err)
-			utils.DisplayError(w, http.StatusInternalServerError, "Unable to fetch comments") 
+			utils.DisplayError(w, http.StatusInternalServerError, "Unable to fetch comments")
 			return
 		}
 
@@ -142,14 +142,21 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	categories := utils.FetchCategories()
 
+	name, err := db.GetUser(currentUserID)
+	if err != nil {
+		log.Println(err.Error())
+	}
+
 	data := struct {
 		Posts         []models.Post
 		CurrentUserID int
 		Categories    []models.Categories
+		Name          string
 	}{
 		Posts:         posts,
 		CurrentUserID: currentUserID,
 		Categories:    categories,
+		Name:          name,
 	}
 
 	tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/home.html", "web/templates/sidebar.html"))

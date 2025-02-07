@@ -9,7 +9,7 @@
   </head>
   <body>
     <header>
-      <h1>Welcome to the Forum</h1>
+      <h1>Welcome to the Forum {{ if $.CurrentUserID }} {{.Name}} {{end}}</h1>
       <nav>
         <a href="/">Home</a>
         {{ if $.CurrentUserID }}
