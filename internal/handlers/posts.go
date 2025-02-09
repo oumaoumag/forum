@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"forum/internal/auth"
 	"forum/internal/db"
@@ -25,13 +27,20 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		// Fetch categories to display in the form
 		categories := utils.FetchCategories()
+		name, err := db.GetUser(currentUserID)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 
 		data := struct {
 			CurrentUserID int
 			Categories    []models.Categories
+			Name          string
 		}{
 			CurrentUserID: currentUserID,
 			Categories:    categories,
+			Name:          name,
 		}
 
 		// Render the form
@@ -42,6 +51,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		if err = tmpl.Execute(w, data); err != nil {
 			http.Error(w, "Error rendering template", http.StatusInternalServerError)
+			return
 		}
 	} else if r.Method == http.MethodPost {
 		// Parse form input
@@ -60,8 +70,9 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "All fields are required", http.StatusBadRequest)
 			return
 		}
-		if title == " " || content == " "{
+		if strings.TrimSpace(title) == "" || strings.TrimSpace(content) == "" {
 			http.Error(w, "Tittle or Content cannot be spaces", http.StatusBadRequest)
+			return
 		}
 
 		// Insert post into the database
