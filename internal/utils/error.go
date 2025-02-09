@@ -1,9 +1,9 @@
 package utils
 
 import (
+	"log"
 	"net/http"
 	"text/template"
-	"log"
 )
 
 func DisplayError(w http.ResponseWriter, code int, message string) {

@@ -7,7 +7,7 @@ import (
 
 	"forum/internal/auth"
 	"forum/internal/db"
-	"forum/internal/utils" 
+	"forum/internal/utils"
 )
 
 func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {

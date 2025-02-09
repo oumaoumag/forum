@@ -19,8 +19,8 @@ func FormatTime(t time.Time) string {
 	case diff < 7*24*time.Hour:
 		return fmt.Sprintf("%d d ago", int(diff.Hours()/24))
 	case t.Year() == now.Year():
-		return t.Format("Jan 2006") 
+		return t.Format("Jan 2006")
 	default:
-		return t.Format("Jan 02 2006") 
+		return t.Format("Jan 02 2006")
 	}
 }

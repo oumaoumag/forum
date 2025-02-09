@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -27,11 +26,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		// Fetch categories to display in the form
 		categories := utils.FetchCategories()
-		name, err := db.GetUser(currentUserID)
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
+		name, _ := db.GetUser(currentUserID)
 
 		data := struct {
 			CurrentUserID int

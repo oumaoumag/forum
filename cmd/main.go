@@ -15,7 +15,7 @@ func main() {
 	if err := db.Init("./forum.db"); err != nil {
 		log.Println("error:", err)
 	}
-	
+
 	go db.ScheduleSessionCleanup(1*time.Hour, db.CleanupExpiredSessions)
 
 	mux := http.NewServeMux()

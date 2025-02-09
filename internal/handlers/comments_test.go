@@ -16,7 +16,7 @@ import (
 
 // setupTestDB initializes an in-memory SQLite database for testing
 func setupTestDB(t *testing.T) *sql.DB {
-//	var database *sql.DB
+	//	var database *sql.DB
 
 	// Open an in-memory SQLite databse
 	database, err := sql.Open("sqlite3", ":memory:")
@@ -29,7 +29,7 @@ func setupTestDB(t *testing.T) *sql.DB {
 
 	// create tables
 	queries := []string{
-	`CREATE TABLE IF NOT EXISTS testUsers (
+		`CREATE TABLE IF NOT EXISTS testUsers (
 		user_id INTEGER PRIMARY KEY AUTOINCREMENT,
 		username TEXT NOT NULL UNIQUE,
 		email TEXT NOT NULL UNIQUE,
@@ -70,15 +70,15 @@ func setupTestDB(t *testing.T) *sql.DB {
 				FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
 				FOREIGN KEY (user_id) REFERENCES testUsers(user_id) ON DELETE CASCADE
 );`,
-}
+	}
 
-for _,query := range queries {
-	_, err = database.Exec(query)
-	if err != nil {
-		t.Fatalf("Failed to create table: %v", err)
-}
-}
-return database
+	for _, query := range queries {
+		_, err = database.Exec(query)
+		if err != nil {
+			t.Fatalf("Failed to create table: %v", err)
+		}
+	}
+	return database
 }
 
 // insertTestData inserts sample data into the database for testing
@@ -99,7 +99,7 @@ func insertTestData(t *testing.T, db *sql.DB) {
 	_, err = db.Exec(`INSERT INTO posts (user_id, category_id, title, content) VALUES (?, ?, ?, ?)`, 1, 1, "Test Post", "This is a test post")
 	if err != nil {
 		t.Fatalf("Failed to insert post: %v", err)
-}
+	}
 }
 
 func TestCreateCommentHandler(t *testing.T) {
