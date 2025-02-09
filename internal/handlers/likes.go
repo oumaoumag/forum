@@ -3,11 +3,12 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"forum/internal/db"
 	"forum/internal/models"
-	"forum/internal/utils" 
+	"forum/internal/utils"
 )
 
 // LikeHandler handles liking and disliking of posts and comments
@@ -74,13 +75,16 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 
 	var likes, dislikes int
 	countQuery := `
-		SELECT 
-			SUM(CASE WHEN like_type = 'like' THEN 1 ELSE 0 END) AS likes,
-			SUM(CASE WHEN like_type = 'dislike' THEN 1 ELSE 0 END) AS dislikes
-		FROM likes
-		WHERE post_id IS ? AND comment_id IS ?`
-	err = db.DB.QueryRow(countQuery, req.PostID, req.CommentID).Scan(&likes, &dislikes)
+	SELECT 
+		COALESCE(SUM(CASE WHEN like_type = 'like' THEN 1 ELSE 0 END), 0) AS likes,
+		COALESCE(SUM(CASE WHEN like_type = 'dislike' THEN 1 ELSE 0 END), 0) AS dislikes
+	FROM likes
+	WHERE (post_id = ? OR (post_id IS NULL AND ? IS NULL)) 
+	AND (comment_id = ? OR (comment_id IS NULL AND ? IS NULL))`
+
+	err = db.DB.QueryRow(countQuery, req.PostID, req.PostID, req.CommentID, req.CommentID).Scan(&likes, &dislikes)
 	if err != nil {
+		fmt.Println(err.Error())
 		utils.DisplayError(w, http.StatusInternalServerError, "Failed to fetch updated counts")
 		return
 	}
