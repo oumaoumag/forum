@@ -14,8 +14,13 @@ import (
 )
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	
+	if r.URL.Path != "/"  {
+		utils.DisplayError(w, http.StatusMethodNotAllowed, "Method not allowed")
+		return
+	}
+	
 	currentUserID := auth.GetCurrentUserID(r)
-
 	// Get filter query parameters
 	categoryFilter := r.URL.Query().Get("category")
 	createdFilter := r.URL.Query().Get("created")
