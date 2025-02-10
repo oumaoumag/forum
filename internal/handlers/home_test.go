@@ -2,16 +2,119 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"strings"
 	"testing"
 
 	"forum/internal/auth"
+	"forum/internal/db"
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+func TestMain(m *testing.M) {
+	// Change working directory to project root to match the server's environment
+	if err := os.Chdir("../.."); err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to change directory: %v\n", err)
+		os.Exit(1)
+	}
+
+	exitCode := m.Run()
+	if db.DB != nil {
+		db.DB.Close()
+	}
+
+	// Run tests
+	// os.Exit(m.Run())
+
+	os.Exit(exitCode)
+}
+
+func setupTestDB(t *testing.T) *sql.DB {
+	t.Helper()
+	testDB, err := sql.Open("sqlite3", "file:testdb?mode=memory&cache=shared")
+	if err != nil {
+		t.Fatalf("Failed to open test database: %v", err)
+	}
+
+	// Create tables matching your schema
+	_, err = testDB.Exec(`
+		CREATE TABLE IF NOT EXISTS users (
+			user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			username TEXT UNIQUE,
+			email TEXT UNIQUE,
+			password TEXT
+		);
+
+		CREATE TABLE IF NOT EXISTS posts (
+			post_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id INTEGER,
+			title TEXT,
+			content TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY(user_id) REFERENCES users(user_id)
+		);
+		
+		CREATE TABLE IF NOT EXISTS comments (
+			comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			post_id INTEGER,
+			user_id INTEGER,
+			content TEXT,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY(post_id) REFERENCES posts(post_id),
+			FOREIGN KEY(user_id) REFERENCES users(user_id)
+		);
+		
+		CREATE TABLE IF NOT EXISTS categories (
+			category_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT UNIQUE
+		);
+		
+		CREATE TABLE IF NOT EXISTS post_categories (
+			post_id INTEGER,
+			category_id INTEGER,
+			PRIMARY KEY(post_id, category_id),
+			FOREIGN KEY(post_id) REFERENCES posts(post_id),
+			FOREIGN KEY(category_id) REFERENCES categories(category_id)
+		);
+		
+		CREATE TABLE IF NOT EXISTS likes (
+			like_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id INTEGER,
+			post_id INTEGER,
+			comment_id INTEGER,
+			like_type TEXT CHECK(like_type IN ('like', 'dislike')),
+			FOREIGN KEY(user_id) REFERENCES users(user_id),
+			FOREIGN KEY(post_id) REFERENCES posts(post_id),
+			FOREIGN KEY(comment_id) REFERENCES comments(comment_id)
+		);
+
+		CREATE TABLE IF NOT EXISTS sessions (
+			session_id TEXT PRIMARY KEY,
+			user_id INTEGER,
+			expires_at DATETIME,
+			FOREIGN KEY(user_id) REFERENCES users(user_id)
+		);
+	`)
+	if err != nil {
+		t.Fatal("Failed to create tables:", err)
+	}
+
+	rows, _ := testDB.Query("SELECT name FROM sqlite_master WHERE type='table'")
+	for rows.Next() {
+		var name string
+		rows.Scan(&name)
+		fmt.Println("Table:", name)
+	}
+
+	db.DB = testDB // Override global DB connection
+	t.Log("Db created Successfuly")
+	return testDB
+}
 
 func TestHomeHandler(t *testing.T) {
 	// Setup in-memory database
@@ -101,7 +204,7 @@ func TestHomeHandler(t *testing.T) {
 			// Create request with query parameters
 			req, err := http.NewRequest("GET", "/?"+tt.queryParams.Encode(), nil)
 			if err != nil {
-				t.Fatal(err)
+				t.Fatal("Be more specific ", err)
 			}
 
 			// Set current user if provided
@@ -137,7 +240,7 @@ func TestHomeHandler(t *testing.T) {
 // insertTestData inserts test data into the database
 func insertHomeTestData(t *testing.T, db *sql.DB) {
 	// Insert test user
-	_, err := db.Exec(`INSERT INTO testUsers (username, email, password) VALUES (?, ?, ?)`, "testuser", "test@example.com", "password123")
+	_, err := db.Exec(`INSERT INTO users (username, email, password) VALUES (?, ?, ?)`, "testuser", "test@example.com", "password123")
 	if err != nil {
 		t.Fatalf("Failed to insert test User: %v", err)
 	}
@@ -150,10 +253,10 @@ func insertHomeTestData(t *testing.T, db *sql.DB) {
 
 	// Insert posts
 	_, err = db.Exec(`
-		INSERT INTO posts (user_id, category_id, title, content) 
-		VALUES (1, 1, 'Test Post', 'Test content'), 
-			   (1, 2, 'Another Post', 'Another content'),
-			   (1, 1, 'Liked Post', 'Liked content')`)
+		INSERT INTO posts (user_id, title, content) 
+		VALUES (1,  'Test Post', 'Test content'), 
+			   (1, 'Another Post', 'Another content'),
+			   (1, 'Liked Post', 'Liked content')`)
 	if err != nil {
 		t.Fatalf("Failed to insert posts: %v", err)
 	}
