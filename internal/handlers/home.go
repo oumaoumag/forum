@@ -144,7 +144,6 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	categories := utils.FetchCategories()
 
 	name, _ := db.GetUser(currentUserID)
-	
 
 	data := struct {
 		Posts         []models.Post
@@ -158,12 +157,17 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		Name:          name,
 	}
 
-	tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/home.html", "web/templates/sidebar.html"))
+	tmpl, err := template.ParseFiles("web/templates/layout.html", "web/templates/home.html", "web/templates/sidebar.html")
+	if err != nil {
+		log.Println(err)
+		utils.DisplayError(w, http.StatusInternalServerError, "server error")
+		return
+	}
 
 	err = tmpl.Execute(w, data)
 	if err != nil {
 		log.Println(err)
-		utils.DisplayError(w, http.StatusInternalServerError, "Unable to render template")
+		utils.DisplayError(w, http.StatusInternalServerError, "server error")
 		return
 	}
 }
