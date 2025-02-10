@@ -16,19 +16,19 @@ import (
 // insertTestData inserts sample data into the database for testing
 func insertTestData(t *testing.T, db *sql.DB) {
 	// Isert a test user
-	_, err := db.Exec(`INSERT INTO testUsers (username, email, password) VALUES (?,?,?)`, "testuser", "test@example.com", "password123")
+	_, err := db.Exec(`INSERT INTO users (username, email, password) VALUES (?,?,?)`, "testuser", "test@example.com", "password123")
 	if err != nil {
 		t.Fatalf("Failed to insert test user: %v", err)
 	}
 
 	// Insert a test cstegory
-	_, err = db.Exec(`INSERT INTO categories (name, description) VALUES (?, ?)`, "Test Category", "This is a test category")
+	_, err = db.Exec(`INSERT INTO categories (name) VALUES ( ?)`, "Test Category")
 	if err != nil {
 		t.Fatalf("Failed to insert test user: %v", err)
 	}
 
 	// Insert a test post
-	_, err = db.Exec(`INSERT INTO posts (user_id, category_id, title, content) VALUES (?, ?, ?, ?)`, 1, 1, "Test Post", "This is a test post")
+	_, err = db.Exec(`INSERT INTO posts (user_id, title, content) VALUES (?, ?, ?)`, 1, "Test Post", "This is a test post")
 	if err != nil {
 		t.Fatalf("Failed to insert post: %v", err)
 	}
