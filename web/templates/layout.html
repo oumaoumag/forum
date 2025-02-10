@@ -13,13 +13,9 @@
       <nav>
         <a href="/">Home</a>
         {{ if $.CurrentUserID }}
-
-        <a href="/post/create">Create Post</a>
-        <a>
           <form action="/logout" method="POST">
-            <button style="margin: 0; padding: 0" type="submit">Logout</button>
+            <button type="submit">Logout</button>
           </form>
-        </a>
         {{else}}
         <a href="/login">Login</a>
         <a href="/register">Register</a>

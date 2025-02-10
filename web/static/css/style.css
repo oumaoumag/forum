@@ -53,6 +53,19 @@ nav form {
   display: inline;
 }
 
+nav form button {
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+nav form button:hover {
+  background-color: white;
+  color: #004d7a;
+}
+
 nav button {
   background: none;
   color: white;
@@ -101,6 +114,7 @@ button {
   cursor: pointer;
   padding: 8px;
   border: none;
+  margin-bottom: 20px;
   border-radius: 5px;
   background-color: #004d7a;
   color: white;
