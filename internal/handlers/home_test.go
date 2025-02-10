@@ -104,13 +104,6 @@ func setupTestDB(t *testing.T) *sql.DB {
 		t.Fatal("Failed to create tables:", err)
 	}
 
-	rows, _ := testDB.Query("SELECT name FROM sqlite_master WHERE type='table'")
-	for rows.Next() {
-		var name string
-		rows.Scan(&name)
-		fmt.Println("Table:", name)
-	}
-
 	db.DB = testDB // Override global DB connection
 	t.Log("Db created Successfuly")
 	return testDB
