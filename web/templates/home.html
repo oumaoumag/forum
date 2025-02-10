@@ -34,7 +34,7 @@
       Comments {{.CommentCount}}
     </button>
   </div>
-  <div class="close" id="{{.PostID}}">
+  <div class="close" id="{{.PostID}}" style="height: 290px; overflow-y: scroll;">
     <h3>Add a comment</h3>
     <form method="POST" action="/comment/create">
       <input type="hidden" name="post_id" value="{{ .PostID }}" />
