@@ -70,6 +70,14 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Delete any existing session for the user (enforcing single-session authentication)
+		_, err = db.DB.Exec(`DELETE FROM sessions WHERE user_id = ?`, userID)
+		if err != nil {
+			utils.DisplayError(w, http.StatusInternalServerError, "Server error")
+			log.Printf("Session delete error: %v", err)
+			return
+		}
+
 		sessionID := uuid.New().String()
 		expiration := time.Now().Add(24 * time.Hour)
 		_, err = db.DB.Exec(`INSERT INTO sessions (session_id, user_id, expires_at) VALUES (?, ?, ?)`, sessionID, userID, expiration)
