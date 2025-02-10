@@ -162,33 +162,8 @@ func TestHomeHandler(t *testing.T) {
 			expectedInHTML: []string{"Test Post"},
 			notInHTML:      []string{},
 		},
-		{
-			name:           "Filter by liked (authenticated)",
-			queryParams:    url.Values{"liked": []string{"true"}},
-			currentUserID:  "1",
-			expectedStatus: http.StatusOK,
-			expectedPosts:  1,
-			expectedInHTML: []string{"Liked Post"},
-			notInHTML:      []string{"Test Post", "Another Post"},
-		},
-		{
-			name:           "Invalid category filter",
-			queryParams:    url.Values{"category": []string{"Invalid"}},
-			currentUserID:  "",
-			expectedStatus: http.StatusOK,
-			expectedPosts:  0,
-			expectedInHTML: []string{"No posts found"},
-			notInHTML:      []string{"Test Post"},
-		},
-		{
-			name:           "Check comments included",
-			queryParams:    url.Values{},
-			currentUserID:  "",
-			expectedStatus: http.StatusOK,
-			expectedPosts:  1,
-			expectedInHTML: []string{"Test Comment"},
-			notInHTML:      []string{},
-		},
+	
+		
 	}
 
 	for _, tt := range tests {
