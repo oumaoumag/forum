@@ -123,6 +123,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			errors["confirmpassword"] = "Passwords do not match"
 		}
 
+		if !utils.ValidatePassword(password) {
+			errors["password"] = "Invalid password, please use at least one of lower case, uppercase, digits and special characters"
+		}
+
 		var exists bool
 		err := db.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE email = ? OR username = ?)`, email, username).Scan(&exists)
 		if err != nil && err != sql.ErrNoRows {
