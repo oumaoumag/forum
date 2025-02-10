@@ -9,7 +9,7 @@
     <strong>Posted by:</strong> {{ .Username }} | <strong>Categories:</strong>
     {{ range $index, $cat := .Categories }}
       {{ if $index }}, {{ end }}
-      <a href="/?category={{ $cat }}">{{ $cat }}</a>
+      <span>{{ $cat }}</span>
       {{ else }}
         Uncategorized
       {{ end }} | <strong>Created </strong> {{ .CreatedAt }}
