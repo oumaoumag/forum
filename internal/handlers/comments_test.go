@@ -9,77 +9,9 @@ import (
 	"testing"
 
 	"forum/internal/auth"
-	"forum/internal/db"
 
 	_ "github.com/mattn/go-sqlite3" // SQLite driver
 )
-
-// setupTestDB initializes an in-memory SQLite database for testing
-func setupTestDB(t *testing.T) *sql.DB {
-	//	var database *sql.DB
-
-	// Open an in-memory SQLite databse
-	database, err := sql.Open("sqlite3", ":memory:")
-	if err != nil {
-		t.Fatalf("Failed to open in-memory database: %v", err)
-	}
-
-	// set up global db insrance
-	db.DB = database
-
-	// create tables
-	queries := []string{
-		`CREATE TABLE IF NOT EXISTS testUsers (
-		user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-		username TEXT NOT NULL UNIQUE,
-		email TEXT NOT NULL UNIQUE,
-		password TEXT NOT NULL,
-		profile_picture TEXT,
-		bio TEXT,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-		);`,
-
-		`CREATE TABLE IF NOT EXISTS categories (
-		post_id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name TEXT NOT NULL UNIQUE,
-		description TEXT,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-		);`,
-
-		`CREATE TABLE IF NOT EXISTS posts (
-		post_id INTEGER PRIMARY KEY AUTOINCREMENT,
-		user_id INTEGER NOT NULL,
-		category_id INTEGER NOT NULL,
-		title TEXT NOT NULL,
-		content TEXT NOT NULL,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		FOREIGN KEY (user_id) REFERENCES testUsers(user_id) ON DELETE CASCADE,
-		FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE
-		);`,
-
-		`CREATE TABLE IF NOT EXISTS comments (
-				comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
-				post_id INTEGER NOT NULL,
-				user_id INTEGER NOT NULL,
-				content TEXT NOT NULL,
-				created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-				updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-				FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
-				FOREIGN KEY (user_id) REFERENCES testUsers(user_id) ON DELETE CASCADE
-);`,
-	}
-
-	for _, query := range queries {
-		_, err = database.Exec(query)
-		if err != nil {
-			t.Fatalf("Failed to create table: %v", err)
-		}
-	}
-	return database
-}
 
 // insertTestData inserts sample data into the database for testing
 func insertTestData(t *testing.T, db *sql.DB) {
