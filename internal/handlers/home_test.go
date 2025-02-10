@@ -162,6 +162,42 @@ func TestHomeHandler(t *testing.T) {
 			expectedInHTML: []string{"Test Post"},
 			notInHTML:      []string{},
 		},
+		// {
+        //     name:           "Filter by liked (authenticated)",
+        //     queryParams:    url.Values{"liked": []string{"true"}},
+        //     currentUserID:  "1",
+        //     expectedStatus: http.StatusOK,
+        //     expectedPosts:  1, // Only one post is liked by user 1
+        //     expectedInHTML: []string{"Liked Post"},
+        //     notInHTML:      []string{"Test Post", "Another Post"},
+        // },
+        // {
+        //     name:           "Filter by liked (unauthenticated)",
+        //     queryParams:    url.Values{"liked": []string{"true"}},
+        //     currentUserID:  "",
+        //     expectedStatus: http.StatusOK,
+        //     expectedPosts:  3, // Filter ignored, show all posts
+        //     expectedInHTML: []string{"Test Post", "Another Post", "Liked Post"},
+        //     notInHTML:      []string{},
+        // },
+        {
+            name:           "Filter by category and created (authenticated)",
+            queryParams:    url.Values{"category": []string{"Test Category"}, "created": []string{"true"}},
+            currentUserID:  "1",
+            expectedStatus: http.StatusOK,
+            expectedPosts:  2, // Two posts belong to user 1 and are in "Test Category"
+            expectedInHTML: []string{"Test Post", "Liked Post"},
+            notInHTML:      []string{"Another Post"},
+        },
+        // {
+        //     name:           "Filter by category and liked (authenticated)",
+        //     queryParams:    url.Values{"category": []string{"Test Category"}, "liked": []string{"true"}},
+        //     currentUserID:  "1",
+        //     expectedStatus: http.StatusOK,
+        //     expectedPosts:  1, // Only one post is liked by user 1 and in "Test Category"
+        //     expectedInHTML: []string{"Liked Post"},
+        //     notInHTML:      []string{"Test Post", "Another Post"},
+        // },
 	
 		
 	}
