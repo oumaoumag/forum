@@ -105,7 +105,6 @@ func setupTestDB(t *testing.T) *sql.DB {
 	}
 
 	db.DB = testDB // Override global DB connection
-	t.Log("Db created Successfuly")
 	return testDB
 }
 
@@ -146,13 +145,13 @@ func TestHomeHandler(t *testing.T) {
 			notInHTML:      []string{"Another Post"},
 		},
 		{
-			name:           "Filter by created (authenticated)",
-			queryParams:    url.Values{"created": []string{"true"}},
-			currentUserID:  "1",
-			expectedStatus: http.StatusOK,
-			expectedPosts:  1,
-			expectedInHTML: []string{"Test Post"},
-			notInHTML:      []string{"Another Post"},
+				name:           "Filter by created (authenticated)",
+				queryParams:    url.Values{"created": []string{"true"}},
+				currentUserID:  "1",
+				expectedStatus: http.StatusOK,
+				expectedPosts:  3, // All 3 posts belong to user 1
+				expectedInHTML: []string{"Test Post", "Another Post", "Liked Post"},
+				notInHTML:      []string{},
 		},
 		{
 			name:           "Filter by created (unauthenticated)",
@@ -170,7 +169,7 @@ func TestHomeHandler(t *testing.T) {
 			expectedStatus: http.StatusOK,
 			expectedPosts:  1,
 			expectedInHTML: []string{"Liked Post"},
-			notInHTML:      []string{"Test Post"},
+			notInHTML:      []string{"Test Post", "Another Post"},
 		},
 		{
 			name:           "Invalid category filter",
@@ -197,7 +196,7 @@ func TestHomeHandler(t *testing.T) {
 			// Create request with query parameters
 			req, err := http.NewRequest("GET", "/?"+tt.queryParams.Encode(), nil)
 			if err != nil {
-				t.Fatal("Be more specific ", err)
+				t.Fatal("Failed Bad Request", err)
 			}
 
 			// Set current user if provided
@@ -233,9 +232,10 @@ func TestHomeHandler(t *testing.T) {
 // insertTestData inserts test data into the database
 func insertHomeTestData(t *testing.T, db *sql.DB) {
 	// Insert test user
-	_, err := db.Exec(`INSERT INTO users (username, email, password) VALUES (?, ?, ?)`, "testuser", "test@example.com", "password123")
+	_, err := db.Exec(`INSERT INTO users (username, email, password) VALUES (?, ?, ?)`,
+		"testuser", "test@example.com", "password123")
 	if err != nil {
-		t.Fatalf("Failed to insert test User: %v", err)
+		t.Fatalf("Failed to insert test user: %v", err)
 	}
 
 	// Insert categories
@@ -246,12 +246,20 @@ func insertHomeTestData(t *testing.T, db *sql.DB) {
 
 	// Insert posts
 	_, err = db.Exec(`
-		INSERT INTO posts (user_id, title, content) 
-		VALUES (1,  'Test Post', 'Test content'), 
-			   (1, 'Another Post', 'Another content'),
-			   (1, 'Liked Post', 'Liked content')`)
+        INSERT INTO posts (user_id, title, content) 
+        VALUES (1, 'Test Post', 'Test content'),
+               (1, 'Another Post', 'Another content'),
+               (1, 'Liked Post', 'Liked content')`)
 	if err != nil {
 		t.Fatalf("Failed to insert posts: %v", err)
+	}
+
+	// Link posts to categories
+	_, err = db.Exec(`
+        INSERT INTO post_categories (post_id, category_id)
+        VALUES (1, 1), (2, 2), (3, 1)`)
+	if err != nil {
+		t.Fatalf("Failed to link posts to categories: %v", err)
 	}
 
 	// Insert like for Liked Post
