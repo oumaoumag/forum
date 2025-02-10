@@ -41,7 +41,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		// Render the form
 		tmpl, err := template.ParseFiles("web/templates/layout.html", "web/templates/post.html", "web/templates/sidebar.html")
 		if err != nil {
-			http.Error(w, "Unable to load template", http.StatusInternalServerError)
+			utils.DisplayError(w, http.StatusInternalServerError, "server error")
 			return
 		}
 		if err = tmpl.Execute(w, data); err != nil {
@@ -52,7 +52,8 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		// Parse form input
 		err := r.ParseForm()
 		if err != nil {
-			http.Error(w, "Invalid form data", http.StatusBadRequest)
+			utils.DisplayError(w, http.StatusBadRequest, "Invalid form data")
+
 			return
 		}
 
@@ -61,12 +62,12 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		categories := r.Form["category"]
 
 		// Validate inputs
-		if title == "" || content == "" || len(categories) == 0 {
-			http.Error(w, "All fields are required", http.StatusBadRequest)
+		if title == "" || content == ""{
+			utils.DisplayError(w, http.StatusBadRequest, "All fields are required")
 			return
 		}
 		if strings.TrimSpace(title) == "" || strings.TrimSpace(content) == "" {
-			http.Error(w, "Tittle or Content cannot be spaces", http.StatusBadRequest)
+			utils.DisplayError(w, http.StatusBadRequest, "Tittle or Content cannot be spaces")
 			return
 		}
 
@@ -77,14 +78,14 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		result, err := db.DB.Exec(query, userID, title, content)
 		if err != nil {
 			log.Println(err)
-			http.Error(w, "Unable to create post", http.StatusInternalServerError)
+			utils.DisplayError(w, http.StatusInternalServerError, "Unable to create post")
 			return
 		}
 
 		// Get the newly created post's ID
 		postID, err := result.LastInsertId()
 		if err != nil {
-			http.Error(w, "Failed to retrieve post ID", http.StatusInternalServerError)
+			utils.DisplayError(w, http.StatusInternalServerError, "Failed to retrieve post ID")
 			return
 		}
 
@@ -92,12 +93,12 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		for _, catIDStr := range categories {
 			catID, err := strconv.Atoi(catIDStr)
 			if err != nil {
-				http.Error(w, "Invalid category ID: "+catIDStr, http.StatusBadRequest)
+				utils.DisplayError(w, http.StatusBadRequest, "Invalid category ID: "+catIDStr)
 				return
 			}
 			_, err = db.DB.Exec("INSERT INTO post_categories (post_id, category_id) VALUES (?, ?)", postID, catID)
 			if err != nil {
-				http.Error(w, "Failed to link category to post: "+err.Error(), http.StatusInternalServerError)
+				utils.DisplayError(w, http.StatusInternalServerError, "Failed to link category to post: "+err.Error())
 				return
 			}
 		}

@@ -1,6 +1,6 @@
 {{ define "title" }}Home{{ end }} {{define "content"}}
 <h2>Forum Home Page</h2>
-<p>Welcome to the forum!</p>
+<a href="/post/create" style="margin-bottom: 20px;"><button>Create Post</button></a>
 
 {{ if .Posts }} {{ range .Posts }}
 <div class="post">
@@ -9,7 +9,7 @@
     <strong>Posted by:</strong> {{ .Username }} | <strong>Categories:</strong>
     {{ range $index, $cat := .Categories }}
       {{ if $index }}, {{ end }}
-      <a href="/?category={{ $cat }}">{{ $cat }}</a>
+      <span>{{ $cat }}</span>
       {{ else }}
         Uncategorized
       {{ end }} | <strong>Created </strong> {{ .CreatedAt }}
@@ -34,7 +34,14 @@
       Comments {{.CommentCount}}
     </button>
   </div>
-  <div class="close" id="{{.PostID}}">
+  <div class="close" id="{{.PostID}}" style="height: 290px; overflow-y: scroll;">
+    <h3>Add a comment</h3>
+    <form method="POST" action="/comment/create">
+      <input type="hidden" name="post_id" value="{{ .PostID }}" />
+      <textarea name="content" rows="4" required></textarea>
+      <br />
+      <button type="submit">Submit</button>
+    </form>
     {{ if .Comments }} {{ range .Comments }}
     <div class="comment">
       <p><strong>{{ .Username }}</strong> {{ .CreatedAt }}</p>
@@ -61,13 +68,7 @@
     {{ end }}
 
     <!-- Add Comment Form -->
-    <h3>Add a comment</h3>
-    <form method="POST" action="/comment/create">
-      <input type="hidden" name="post_id" value="{{ .PostID }}" />
-      <textarea name="content" rows="4" required></textarea>
-      <br />
-      <button type="submit">Submit</button>
-    </form>
+    
   </div>
 </div>
 {{ end }} {{ else }}

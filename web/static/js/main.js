@@ -1,5 +1,10 @@
 // Function to handle like/dislike for a post
 async function reactToPost(userId, postId, likeType) {
+  if (userId == 0) {
+    window.location.href = "/login"
+    return
+  }
+  
   try {
     const response = await fetch("/like", {
       method: "POST",
@@ -29,6 +34,11 @@ async function reactToPost(userId, postId, likeType) {
 
 // Function to handle like/dislike for a comment
 async function reactToComment(userId, commentId, likeType) {
+  if (userId == 0) {
+    window.location.href = "/login"
+    return
+  }
+
   try {
     const response = await fetch("/like", {
       method: "POST",

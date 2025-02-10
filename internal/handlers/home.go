@@ -59,9 +59,10 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         INNER JOIN likes lk 
         ON p.post_id = lk.post_id 
         AND lk.user_id = ? 
+		AND lk.like_type = ?
         AND lk.comment_id IS NULL
     `)
-		params = append(params, currentUserID)
+		params = append(params, currentUserID, "like")
 	}
 
 	if len(joins) > 0 {
@@ -142,10 +143,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	categories := utils.FetchCategories()
 
-	name, err := db.GetUser(currentUserID)
-	if err != nil {
-		log.Println(err.Error())
-	}
+	name, _ := db.GetUser(currentUserID)
 
 	data := struct {
 		Posts         []models.Post
@@ -159,12 +157,17 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		Name:          name,
 	}
 
-	tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/home.html", "web/templates/sidebar.html"))
+	tmpl, err := template.ParseFiles("web/templates/layout.html", "web/templates/home.html", "web/templates/sidebar.html")
+	if err != nil {
+		log.Println(err)
+		utils.DisplayError(w, http.StatusInternalServerError, "server error")
+		return
+	}
 
 	err = tmpl.Execute(w, data)
 	if err != nil {
 		log.Println(err)
-		utils.DisplayError(w, http.StatusInternalServerError, "Unable to render template")
+		utils.DisplayError(w, http.StatusInternalServerError, "server error")
 		return
 	}
 }
