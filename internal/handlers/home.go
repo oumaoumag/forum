@@ -143,10 +143,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	categories := utils.FetchCategories()
 
-	name, err := db.GetUser(currentUserID)
-	if err != nil {
-		log.Println(err.Error())
-	}
+	name, _ := db.GetUser(currentUserID)
+	
 
 	data := struct {
 		Posts         []models.Post
