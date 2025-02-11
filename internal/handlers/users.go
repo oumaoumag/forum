@@ -16,6 +16,10 @@ import (
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/login" {
+		utils.DisplayError(w, http.StatusNotFound, " page not found")
+		return
+	}
 	if r.Method == http.MethodGet {
 		tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/login.html", "web/templates/sidebar.html"))
 		if err := tmpl.Execute(w, nil); err != nil {
@@ -93,6 +97,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/register" {
+		utils.DisplayError(w, http.StatusNotFound, " page not found")
+		return
+	}
 	if r.Method == http.MethodGet {
 		tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/register.html", "web/templates/sidebar.html"))
 		if err := tmpl.Execute(w, nil); err != nil {
@@ -173,6 +181,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/logout" {
+		utils.DisplayError(w, http.StatusNotFound, " page not found")
+		return
+	}
 	if r.Method != http.MethodPost {
 		utils.DisplayError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		return

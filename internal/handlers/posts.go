@@ -14,6 +14,10 @@ import (
 )
 
 func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/post/create" {
+		utils.DisplayError(w, http.StatusNotFound, " page not found")
+		return
+	}
 	currentUserID := auth.GetCurrentUserID(r)
 
 	// Retrieve the user ID from the context

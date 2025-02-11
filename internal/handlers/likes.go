@@ -13,6 +13,10 @@ import (
 
 // LikeHandler handles liking and disliking of posts and comments
 func LikeHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/like" {
+		utils.DisplayError(w, http.StatusNotFound, " page not found")
+		return
+	}
 	if r.Method != http.MethodPost {
 		utils.DisplayError(w, http.StatusMethodNotAllowed, "Invalid request method")
 		return

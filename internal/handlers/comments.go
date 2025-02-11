@@ -11,6 +11,10 @@ import (
 )
 
 func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/comment/create" {
+		utils.DisplayError(w, http.StatusNotFound, " page not found")
+		return
+	}
 	if r.Method != http.MethodPost {
 		utils.DisplayError(w, http.StatusMethodNotAllowed, "Invalid request method")
 		return
