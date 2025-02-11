@@ -1,11 +1,11 @@
 
-# Forum Authentication
+# Forum 
 
 ## Objectives
 
 This project is a web forum with the following functionality:
 
-- **Authentication**: Users can authenticate using Google, GitHub, or a traditional email/password method.
+
 - **Communication between users**: Users can interact by creating posts and comments.
 - **Image Upload**: Users can also interact by uploading images to the posts they are trying to make.
 - **Categorization of posts**: Posts can be associated with one or more categories.
