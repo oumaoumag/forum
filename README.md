@@ -75,23 +75,35 @@ The forum includes a filtering mechanism to:
 
 
 
-## Docker
 
-**Docker** has been used to allow packaging the application and its dependencies into a container, ensuring consistent behavior across environments.
+## Docker Usage
 
-To build the image:
+### Building the Docker Image
 
-```
-docker build -t forum .
-```
 
-Then to run the built image:
 
-```
-docker run -d -p 8000:8000 forum
-```
+ Navigate to the root directory of your project.
+2. Run the following command to build the Docker image:
 
----
+```bash
+
+   docker build -t <image name> -f docker/Dockerfile .
+   ```
+
+  
+## Running the Docker Container in the server
+
+
+
+ ```bash
+docker run -it -p 8080:8080 <name of the image>
+
+   ```
+## To Run in the container
+
+```bash
+
+docker container run -d -p 8080:8080 --name forum <name of container>
 
 ## How to run the application
 
