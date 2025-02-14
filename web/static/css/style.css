@@ -277,7 +277,7 @@ footer {
   padding: 0.75rem;
   border: none;
   border-radius: var(--border-radius);
-  background: rgba(184, 171, 171, 0.4);
+  background-color: #004d7a;
   color: var(--text-color);
   cursor: pointer;
   transition: background-color 0.2s;
@@ -288,6 +288,7 @@ footer {
   flex-direction: row;
   gap: 1rem;
   margin: 1.5rem 0;
+  
 }
 
 .social-btn img {
@@ -296,9 +297,7 @@ footer {
   object-fit: contain;
 }
 
-.social-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
+
 
 .social-login {
   flex-direction: column;
