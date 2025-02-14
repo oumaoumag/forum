@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -14,7 +15,14 @@ import (
 )
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
+	rxp, err := regexp.Compile(`/post/[\d]`)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	if !(r.URL.Path == "/" || rxp.MatchString(r.URL.Path)) {
+
 		utils.DisplayError(w, http.StatusNotFound, " page not found")
 		return
 	}
