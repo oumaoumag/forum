@@ -278,7 +278,7 @@ footer {
   border: none;
   border-radius: var(--border-radius);
   background-color: #004d7a;
-  color: var(--text-color);
+  color: white;
   cursor: pointer;
   transition: background-color 0.2s;
 }
