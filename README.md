@@ -109,24 +109,25 @@ docker container run -d -p 8080:8080 --name forum <name of container>
 
 1. Clone the Repository:
 
-   ```
+```
    git clone https://learn.zone01kisumu.ke/git/oumouma/forum-authentication.git
-   cd forum
+cd forum
    ```
 
 2. Run the following command:
 
    
 
-   ```
+```
    go run /cmd/main.go
    ```
 
 3. On your Web Browser:
 
-   ```
+```
    localhost:8000
-   ```
+```
+
 ## Contributing
 
 We love collaboration! Pull requests are welcome, and for major changes, please open an issue first to discuss your ideas. Let’s make this project even better together! 
