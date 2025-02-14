@@ -1,5 +1,5 @@
 
-# Forum 
+# Forum-Authentication
 
 ## Objectives
 
@@ -110,7 +110,7 @@ docker container run -d -p 8080:8080 --name forum <name of container>
 1. Clone the Repository:
 
    ```
-   git clone https://learn.zone01kisumu.ke/git/vmuhembe/forum.git
+   git clone https://learn.zone01kisumu.ke/git/oumouma/forum-authentication.git
    cd forum
    ```
 
