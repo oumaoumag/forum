@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -20,55 +19,55 @@ import (
 )
 
 var (
-    githubOAuthConfig *oauth2.Config
-    oauthStateString  = "random" 
+	githubOAuthConfig *oauth2.Config
+	oauthStateString  = "random"
 )
 
 func init() {
-    // Load environment variables from the .env file
-    if err := godotenv.Load(); err != nil {
-        log.Fatal("Error loading .env file")
-    }
+	// Load environment variables from the .env file
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
-    githubClientID := os.Getenv("GITHUB_CLIENT_ID")
-    githubClientSecret := os.Getenv("GITHUB_CLIENT_SECRET")
-    redirectURL := os.Getenv("GITHUB_REDIRECT_URL")
+	githubClientID := os.Getenv("GITHUB_CLIENT_ID")
+	githubClientSecret := os.Getenv("GITHUB_CLIENT_SECRET")
+	redirectURL := os.Getenv("GITHUB_REDIRECT_URL")
 
-    // Check if any variable is empty
-    if githubClientID == "" || githubClientSecret == "" || redirectURL == "" {
-        log.Fatalf("Error: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, and GITHUB_REDIRECT_URL environment variables must be set.")
-    }
+	// Check if any variable is empty
+	if githubClientID == "" || githubClientSecret == "" || redirectURL == "" {
+		log.Fatalf("Error: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, and GITHUB_REDIRECT_URL environment variables must be set.")
+	}
 
-   
-    // Initialize GitHub OAuth Config
-    githubOAuthConfig = &oauth2.Config{
-        ClientID:     githubClientID,
-        ClientSecret: githubClientSecret,
-        RedirectURL:  redirectURL,
-        Scopes: []string{
-            "user:email", // Request access to the user's email address
-        },
-        Endpoint: github.Endpoint,
-    }
-
-    
+	// Initialize GitHub OAuth Config
+	githubOAuthConfig = &oauth2.Config{
+		ClientID:     githubClientID,
+		ClientSecret: githubClientSecret,
+		RedirectURL:  redirectURL,
+		Scopes: []string{
+			"user:email", // Request access to the user's email address
+		},
+		Endpoint: github.Endpoint,
+	}
 }
-
 
 // GitHubLoginHandler redirects the user to GitHub's OAuth consent screen.
 func GitHubLoginHandler(w http.ResponseWriter, r *http.Request) {
-    if githubOAuthConfig == nil {
-        utils.DisplayError(w, http.StatusInternalServerError, "GitHub OAuth not configured")
-        return
-    }
+	if githubOAuthConfig == nil {
+		utils.DisplayError(w, http.StatusInternalServerError, "GitHub OAuth not configured")
+		return
+	}
 
-    url := githubOAuthConfig.AuthCodeURL(oauthStateString)
-    http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+	url := githubOAuthConfig.AuthCodeURL(oauthStateString)
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
+// GitHubCallbackHandler handles the callback from GitHub OAuth.
+// Define a struct to handle the GitHub user data
+type GitHubUser struct {
+    Login string `json:"login"`
+    Email string `json:"email"`
+}
 
-// GitHubCallbackHandler handles the callback from GitHub OAuth.
-// GitHubCallbackHandler handles the callback from GitHub OAuth.
 func GitHubCallbackHandler(w http.ResponseWriter, r *http.Request) {
     if githubOAuthConfig == nil {
         utils.DisplayError(w, http.StatusInternalServerError, "GitHub OAuth not configured")
@@ -90,18 +89,15 @@ func GitHubCallbackHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Use Authorization header with Bearer token
-    req, err := http.NewRequest("GET", "https://api.github.com/user/emails", nil)
+    req, err := http.NewRequest("GET", "https://api.github.com/user", nil) // Use `/user` endpoint for user details
     if err != nil {
         log.Printf("Failed to create request: %s", err.Error())
         http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
         return
     }
 
-    // Set the Authorization header with the token
     req.Header.Set("Authorization", "Bearer "+token.AccessToken)
 
-    // Make the request
     client := &http.Client{}
     resp, err := client.Do(req)
     if err != nil {
@@ -111,57 +107,36 @@ func GitHubCallbackHandler(w http.ResponseWriter, r *http.Request) {
     }
     defer resp.Body.Close()
 
-    // Handle the response
-    var emails interface{} // Change to interface{} to inspect the structure of the response
-    if err := json.NewDecoder(resp.Body).Decode(&emails); err != nil {
+    // Parse the response into GitHubUser struct
+    var user GitHubUser
+    if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
         log.Printf("Failed to decode user info: %s", err.Error())
         http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
         return
     }
 
-    //fmt.Println("Emails response:", emails)
-
-    // Handling the case where emails is an array
-    var userEmail string
-    switch v := emails.(type) {
-    case []interface{}:
-        // If the response is an array of emails, find the primary one
-        for _, emailObj := range v {
-            emailData, ok := emailObj.(map[string]interface{})
-            if !ok {
-                continue
-            }
-            if primary, ok := emailData["primary"].(bool); ok && primary {
-                userEmail, _ = emailData["email"].(string)
-                break
-            }
-        }
-    case map[string]interface{}:
-        // If it's a single email object, extract the email
-        if primary, ok := v["primary"].(bool); ok && primary {
-            userEmail, _ = v["email"].(string)
-        }
-    default:
-        log.Printf("Unexpected response format: %v", v)
+    // Now user.Login will contain the GitHub username, and user.Email contains the user's email
+    if user.Email == "" {
+        
         http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
         return
     }
 
-    if userEmail == "" {
-        log.Printf("Could not find primary email")
-        http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-        return
+    // Use GitHub login as username, or create a fallback if not available
+    userGitHubUsername := "GitHubUser" // Fallback username
+    if user.Login != "" {
+        userGitHubUsername = user.Login
     }
 
-    // Find or create user in the database
-    userID, err := findOrCreateUser(userEmail, "GitHub User") // User name could be retrieved from GitHub API as well.
+    // Find or create the user with email and username
+    userID, err := findOrCreateUser(user.Email, userGitHubUsername)
     if err != nil {
         log.Printf("Failed to find or create user: %s", err.Error())
         utils.DisplayError(w, http.StatusInternalServerError, "Failed to authenticate")
         return
     }
 
-    // Delete any existing session for the user (enforcing single-session authentication)
+    // Handle session management and redirection
     _, err = db.DB.Exec(`DELETE FROM sessions WHERE user_id = ?`, userID)
     if err != nil {
         utils.DisplayError(w, http.StatusInternalServerError, "Server error")
@@ -169,7 +144,6 @@ func GitHubCallbackHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Create a session
     sessionID := uuid.New().String()
     expiration := time.Now().Add(24 * time.Hour)
     _, err = db.DB.Exec(`INSERT INTO sessions (session_id, user_id, expires_at) VALUES (?, ?, ?)`, sessionID, userID, expiration)
@@ -183,29 +157,56 @@ func GitHubCallbackHandler(w http.ResponseWriter, r *http.Request) {
     http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+func findOrCreateUser(email, username string) (int, error) {
+	var userID int
+	var existingEmail string
+	var existingUsername string
 
-func findOrCreateUser(email, name string) (string, error) {
-    var userID string
-    err := db.DB.QueryRow(`SELECT user_id FROM users WHERE email = ?`, email).Scan(&userID)
+	// First check if the user already exists by email
+	err := db.DB.QueryRow("SELECT id, email, username FROM users WHERE email = ?", email).Scan(&userID, &existingEmail, &existingUsername)
+	if err == nil {
+		// User already exists, return the existing user ID
+		return userID, nil
+	}
 
-    if err == sql.ErrNoRows {
-        // User doesn't exist, create a new user
-        _, err := db.DB.Exec(`INSERT INTO users (username, email, password) VALUES (?, ?, ?)`, name, email, "") // Password can be empty for GitHub users
+	// If no user exists by email, check if username is unique
+	err = db.DB.QueryRow("SELECT id FROM users WHERE username = ?", username).Scan(&userID)
+	if err == nil {
+		// User with the same username already exists
+		return userID, nil
+	}
 
-        if err != nil {
-            return "", fmt.Errorf("failed to create user: %w", err)
-        }
+	
+	// If the username already exists, create a unique username
+	if err := createUniqueUsername(&username); err != nil {
+		return 0, err
+	}
 
-        // Get the newly created user's ID
-        err = db.DB.QueryRow(`SELECT user_id FROM users WHERE email = ?`, email).Scan(&userID)
-        if err != nil {
-            return "", fmt.Errorf("failed to retrieve user ID after creation: %w", err)
-        }
-        return userID, nil
+	// If the user does not exist, create a new user
+	_, err = db.DB.Exec("INSERT INTO users (email, username) VALUES (?, ?)", email, username)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create user: %w", err)
+	}
 
-    } else if err != nil {
-        return "", fmt.Errorf("failed to query user: %w", err)
-    }
-    return userID, nil
+	// Fetch the newly created user's ID
+	err = db.DB.QueryRow("SELECT id FROM users WHERE email = ?", email).Scan(&userID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to fetch user ID: %w", err)
+	}
+
+	return userID, nil
 }
 
+func createUniqueUsername(username *string) error {
+	var existingUsername string
+	for {
+		// Check if the username is already taken
+		err := db.DB.QueryRow("SELECT username FROM users WHERE username = ?", *username).Scan(&existingUsername)
+		if err != nil {
+			// No conflict, the username is unique
+			return nil
+		}
+		// Username already exists, generate a new one (e.g., append a random string or increment a counter)
+		*username = fmt.Sprintf("%s_%d", *username, uuid.New().ID())
+	}
+}
