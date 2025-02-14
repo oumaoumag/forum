@@ -21,7 +21,7 @@ import (
 
 var (
     githubOAuthConfig *oauth2.Config
-    oauthStateString  = "random" // Replace with a more secure method in production
+    oauthStateString  = "random" 
 )
 
 func init() {
@@ -39,11 +39,7 @@ func init() {
         log.Fatalf("Error: GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, and GITHUB_REDIRECT_URL environment variables must be set.")
     }
 
-    // Log the values of the environment variables to ensure they're correctly loaded
-    log.Printf("GITHUB_CLIENT_ID: %s", githubClientID)
-    log.Printf("GITHUB_CLIENT_SECRET: %s", githubClientSecret)
-    log.Printf("GITHUB_REDIRECT_URL: %s", redirectURL)
-
+   
     // Initialize GitHub OAuth Config
     githubOAuthConfig = &oauth2.Config{
         ClientID:     githubClientID,
@@ -55,12 +51,7 @@ func init() {
         Endpoint: github.Endpoint,
     }
 
-    // Check if the oauthConfig was initialized correctly
-    if githubOAuthConfig == nil {
-        log.Fatal("Error: GitHub OAuth configuration is nil")
-    } else {
-        log.Println("GitHub OAuth configuration initialized successfully")
-    }
+    
 }
 
 
@@ -76,6 +67,7 @@ func GitHubLoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 
+// GitHubCallbackHandler handles the callback from GitHub OAuth.
 // GitHubCallbackHandler handles the callback from GitHub OAuth.
 func GitHubCallbackHandler(w http.ResponseWriter, r *http.Request) {
     if githubOAuthConfig == nil {
@@ -98,7 +90,20 @@ func GitHubCallbackHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    resp, err := http.Get("https://api.github.com/user/emails?access_token=" + token.AccessToken)
+    // Use Authorization header with Bearer token
+    req, err := http.NewRequest("GET", "https://api.github.com/user/emails", nil)
+    if err != nil {
+        log.Printf("Failed to create request: %s", err.Error())
+        http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+        return
+    }
+
+    // Set the Authorization header with the token
+    req.Header.Set("Authorization", "Bearer "+token.AccessToken)
+
+    // Make the request
+    client := &http.Client{}
+    resp, err := client.Do(req)
     if err != nil {
         log.Printf("Failed to get user info: %s", err.Error())
         http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
@@ -106,23 +111,46 @@ func GitHubCallbackHandler(w http.ResponseWriter, r *http.Request) {
     }
     defer resp.Body.Close()
 
-    var emails []struct {
-        Email   string `json:"email"`
-        Primary bool   `json:"primary"`
-    }
+    // Handle the response
+    var emails interface{} // Change to interface{} to inspect the structure of the response
     if err := json.NewDecoder(resp.Body).Decode(&emails); err != nil {
         log.Printf("Failed to decode user info: %s", err.Error())
         http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
         return
     }
 
-    // Extract the primary email
+    //fmt.Println("Emails response:", emails)
+
+    // Handling the case where emails is an array
     var userEmail string
-    for _, email := range emails {
-        if email.Primary {
-            userEmail = email.Email
-            break
+    switch v := emails.(type) {
+    case []interface{}:
+        // If the response is an array of emails, find the primary one
+        for _, emailObj := range v {
+            emailData, ok := emailObj.(map[string]interface{})
+            if !ok {
+                continue
+            }
+            if primary, ok := emailData["primary"].(bool); ok && primary {
+                userEmail, _ = emailData["email"].(string)
+                break
+            }
         }
+    case map[string]interface{}:
+        // If it's a single email object, extract the email
+        if primary, ok := v["primary"].(bool); ok && primary {
+            userEmail, _ = v["email"].(string)
+        }
+    default:
+        log.Printf("Unexpected response format: %v", v)
+        http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+        return
+    }
+
+    if userEmail == "" {
+        log.Printf("Could not find primary email")
+        http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+        return
     }
 
     // Find or create user in the database
@@ -155,6 +183,7 @@ func GitHubCallbackHandler(w http.ResponseWriter, r *http.Request) {
     http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+
 func findOrCreateUser(email, name string) (string, error) {
     var userID string
     err := db.DB.QueryRow(`SELECT user_id FROM users WHERE email = ?`, email).Scan(&userID)
@@ -180,6 +209,3 @@ func findOrCreateUser(email, name string) (string, error) {
     return userID, nil
 }
 
-// Example Usage
-// http.HandleFunc("/login/github", handlers.GitHubLoginHandler)
-// http.HandleFunc("/oauth2/callback/github", handlers.GitHubCallbackHandler)
