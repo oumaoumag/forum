@@ -268,3 +268,38 @@ footer {
     font-size: 0.9rem;
   }
 }
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: var(--border-radius);
+  background: rgba(184, 171, 171, 0.4);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.social-login {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.social-btn img {
+  width: 24px;  /* Adjust this value as needed */
+  height: 24px; /* Adjust this value as needed */
+  object-fit: contain;
+}
+
+.social-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.social-login {
+  flex-direction: column;
+}
