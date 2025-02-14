@@ -104,7 +104,7 @@ docker run -it -p 8080:8080 <name of the image>
 ```bash
 
 docker container run -d -p 8080:8080 --name forum <name of container>
-
+```
 ## How to run the application
 
 1. Clone the Repository:
