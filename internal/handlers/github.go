@@ -102,8 +102,6 @@ func GitHubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
-
 	// Find or create user in our database
 	userID, err := findOrCreateUser(githubUser)
 	if err != nil {
@@ -187,37 +185,37 @@ func getGitHubUserInfo(accessToken string) (*GitHubUser, error) {
 
 // findOrCreateUser either finds an existing user or creates a new one
 func findOrCreateUser(githubUser *GitHubUser) (int, error) {
-    var userID int
-    username := githubUser.Login
-    if username == "" {
-        username = "github_user_" + uuid.New().String()[:8]
-    }
+	var userID int
+	username := githubUser.Login
+	if username == "" {
+		username = "github_user_" + uuid.New().String()[:8]
+	}
 
-    // Check if user exists by email
-    err := db.DB.QueryRow("SELECT user_id FROM users WHERE email = ?", githubUser.Email).Scan(&userID)
-    if err == nil {
-        // User exists, update username if necessary
-        _, err = db.DB.Exec("UPDATE users SET username = ? WHERE user_id = ?", username, userID)
-        return userID, err
-    }
+	// Check if user exists by email
+	err := db.DB.QueryRow("SELECT user_id FROM users WHERE email = ?", githubUser.Email).Scan(&userID)
+	if err == nil {
+		// User exists, update username if necessary
+		_, err = db.DB.Exec("UPDATE users SET username = ? WHERE user_id = ?", username, userID)
+		return userID, err
+	}
 
-    // If user doesn't exist, create a new user
-    fakePassword := "oauth_placeholder" // Placeholder password for OAuth users
+	// If user doesn't exist, create a new user
+	fakePassword := "oauth_placeholder" // Placeholder password for OAuth users
 
-    result, err := db.DBj.Exec(
-        "INSERT INTO users (email, username, password, auth_type) VALUES (?, ?, ?, 'github')",
-        githubUser.Email,
-        username,
-        fakePassword,
-    )
-    if err != nil {
-        return 0, fmt.Errorf("failed to create user: %w", err)
-    }
+	result, err := db.DB.Exec(
+		"INSERT INTO users (email, username, password, auth_type) VALUES (?, ?, ?, 'github')",
+		githubUser.Email,
+		username,
+		fakePassword,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create user: %w", err)
+	}
 
-    id, err := result.LastInsertId()
-    if err != nil {
-        return 0, fmt.Errorf("failed to get new user ID: %w", err)
-    }
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get new user ID: %w", err)
+	}
 
-    return int(id), nil
+	return int(id), nil
 }
