@@ -6,6 +6,7 @@ import (
 	"forum/internal/db"
 	"forum/internal/models"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -77,4 +78,16 @@ func FindOrCreateGoogleUser(googleUser *models.GoogleUser) (int, error) {
 		return 0, fmt.Errorf("failed to create user: %w", err)
 	}
 	return int(id), nil
+}
+
+// state management helpers
+func setStateCookie(w http.ResponseWriter, state string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "oauth_state",
+		Value:    state,
+		Expires:  time.Now().Add(10 * time.Minute),
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	})
 }
