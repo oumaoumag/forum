@@ -81,7 +81,7 @@ func FindOrCreateGoogleUser(googleUser *models.GoogleUser) (int, error) {
 }
 
 // state management helpers
-func setStateCookie(w http.ResponseWriter, state string) {
+func SetStateCookie(w http.ResponseWriter, state string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "oauth_state",
 		Value:    state,
@@ -90,4 +90,12 @@ func setStateCookie(w http.ResponseWriter, state string) {
 		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
 	})
+}
+
+func GetStateFromCookie(r *http.Request) string {
+	cookie, err := r.Cookie("oauth_state")
+	if err != nil {
+		return ""
+	}
+	return cookie.Value
 }
