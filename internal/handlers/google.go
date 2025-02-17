@@ -13,7 +13,7 @@ var (
 	googleOuthConfig *oauth2.Config
 )
 
-
+// init sets up the OAuth2 configuration for google authentication.
 func init() {
 	// Load environment variables from .env file
 	if err := godotenv.Load(); err != nil {
