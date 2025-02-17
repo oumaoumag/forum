@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"forum/internal/db"
 	"forum/internal/utils"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
@@ -56,4 +58,65 @@ func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	url := googleOAuthConfig.AuthCodeURL(state)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
+// GoogleCallbackHandler handles the OAuth callback from Google
+func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	if googleOAuthConfig == nil {
+		utils.DisplayError(w, http.StatusInternalServerError, "Google OAuth not configured")
+		return
+	}
+
+	// Verify state
+	state := r.FormValue("state")
+	savedState := getStateFromCookie(r)
+	if state != savedState {
+		utils.DisplayError(w, http.StatusBadRequest, "Invalid OAuth state")
+		return
+	}
+
+	// Get user Info from Gooogle
+	googleUser, err := getGoogleUserInfo(token.AccessToken)
+	if err != nil {
+		log.Printf("Failed to get Goole User info: %v", err)
+		utils.DisplayError(w, http.StatusInternalServerError, "Failed to get user information")
+		return
+	}
+
+	// Ensure email is verified
+	if !googleUser.VerifiedEmail {
+		utils.DisplayError(w, http.StatusForbidden, "Email not verified with Google")
+		return
+	}
+
+	// Find or create user in our database
+	userID, err := findOrCreateGoogleUser(googleUser)
+	if err != nil {
+		log.Printf("Failed to process user:; %v", err)
+		utils.DisplayError(w, http.StatusInternalServerError, "Failed to process user information")
+		return
+	}
+
+	sessionID := uuid.New().String()
+	expiration := time.Now().Add(24 * time.Hour)
+
+	_, err = db.DB.Exec(
+		`INSERT INTO session (session_id, user_id, expires_at) VALUES (?,?,?)`, sessionID, userID, expiration)
+	if err != nil {
+		log.Printf("Failed to insert session into database: %v", err)
+		utils.DisplayError(w, http.StatusInternalServerError, "Failed to create session")
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_id",
+		Value:   sessionID,
+		Expires:  expiration,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+	})
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
