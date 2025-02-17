@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"forum/internal/db"
 	"forum/internal/utils"
 	"log"
@@ -75,8 +76,17 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Exchange code for token
+	code := r.FormValue("code")
+	token, err := googleOAuthConfig.Exchange(context.Background(), code)
+	if err != nil {
+		log.Printf("Code exchange failed: %v", err)
+		utils.DisplayError(w, http.StatusInternalServerError, "Failed to complete authentication")
+		return
+	}
+
 	// Get user Info from Gooogle
-	googleUser, err := getGoogleUserInfo(token.AccessToken)
+	googleUser, err := utils.GetGoogleUserInfo(token.AccessToken)
 	if err != nil {
 		log.Printf("Failed to get Goole User info: %v", err)
 		utils.DisplayError(w, http.StatusInternalServerError, "Failed to get user information")
@@ -110,7 +120,7 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_id",
-		Value:   sessionID,
+		Value:    sessionID,
 		Expires:  expiration,
 		Path:     "/",
 		HttpOnly: true,
