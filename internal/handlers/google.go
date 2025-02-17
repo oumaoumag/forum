@@ -100,7 +100,7 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Find or create user in our database
-	userID, err := findOrCreateGoogleUser(googleUser)
+	userID, err := utils.FindOrCreateGoogleUser(googleUser)
 	if err != nil {
 		log.Printf("Failed to process user:; %v", err)
 		utils.DisplayError(w, http.StatusInternalServerError, "Failed to process user information")
