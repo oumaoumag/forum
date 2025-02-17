@@ -1,5 +1,8 @@
 // Function to handle like/dislike for a post
 async function reactToPost(userId, postId, likeType) {
+  console.log('UserID:', userId);
+    console.log('PostID:', postId);
+    console.log('LikeType:', likeType);
   if (userId == 0) {
     window.location.href = "/login"
     return

@@ -1,13 +1,21 @@
-CREATE TABLE IF NOT EXISTS users (
-	user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-	username TEXT NOT NULL UNIQUE,
-	email TEXT NOT NULL UNIQUE,
-	password TEXT NOT NULL,
-	profile_picture TEXT,
-	bio TEXT,
-	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE users_new (
+    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    auth_type TEXT NOT NULL DEFAULT 'email', -- New column
+	 provider_id TEXT, -- New colum
+    profile_picture TEXT,
+    bio TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+INSERT INTO users_new (user_id, username, email, password, profile_picture, bio, created_at, updated_at)
+SELECT user_id, username, email, password, profile_picture, bio, created_at, updated_at FROM users;
+
+DROP TABLE users;
+ALTER TABLE users_new RENAME TO users;
 
 CREATE TABLE IF NOT EXISTS post_categories (
 	post_id INTEGER NOT NULL,
@@ -68,3 +76,6 @@ CREATE TABLE IF NOT EXISTS sessions (
     expires_at DATETIME NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
+
+
+

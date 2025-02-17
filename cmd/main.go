@@ -32,6 +32,14 @@ func main() {
 	mux.Handle("/like", auth.SessionMiddleware(auth.RequireAuth(http.HandlerFunc(handlers.LikeHandler))))
 	mux.Handle("/logout", auth.SessionMiddleware(auth.RequireAuth(http.HandlerFunc(handlers.LogoutHandler))))
 
+	// Register GitHub OAuth routes with the same mux
+	mux.HandleFunc("/auth/github", handlers.GitHubLoginHandler)
+	mux.HandleFunc("/oauth2/callback/github", handlers.GitHubCallbackHandler)
+
+	// Register GitHub OAuth routes with the same mux
+	mux.HandleFunc("/auth/google", handlers.GoogleLoginHandler)
+    mux.HandleFunc("/auth/callback/google", handlers.GoogleCallbackHandler)
+
 	server := http.Server{
 		Addr:    ":8080",
 		Handler: mux,

@@ -16,6 +16,7 @@ import (
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	
 	if r.URL.Path != "/login" {
 		utils.DisplayError(w, http.StatusNotFound, " page not found")
 		return
