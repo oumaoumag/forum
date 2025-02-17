@@ -4,6 +4,7 @@ CREATE TABLE users_new (
     email TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
     auth_type TEXT NOT NULL DEFAULT 'email', -- New column
+	 provider_id TEXT, -- New colum
     profile_picture TEXT,
     bio TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
