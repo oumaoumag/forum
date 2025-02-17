@@ -204,7 +204,7 @@ func findOrCreateUser(githubUser *GitHubUser) (int, error) {
     // If user doesn't exist, create a new user
     fakePassword := "oauth_placeholder" // Placeholder password for OAuth users
 
-    result, err := db.DB.Exec(
+    result, err := db.DBj.Exec(
         "INSERT INTO users (email, username, password, auth_type) VALUES (?, ?, ?, 'github')",
         githubUser.Email,
         username,
