@@ -38,7 +38,7 @@ func main() {
 
 	// Register GitHub OAuth routes with the same mux
 	mux.HandleFunc("/auth/google", handlers.GoogleLoginHandler)
-	mux.HandleFunc("/auth/google/callback", handlers.GoogleCallbackHandler)
+    mux.HandleFunc("/auth/callback/google", handlers.GoogleCallbackHandler)
 
 	server := http.Server{
 		Addr:    ":8080",
