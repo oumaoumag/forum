@@ -1,16 +1,19 @@
 package handlers
 
 import (
+	"forum/internal/utils"
 	"log"
+	"net/http"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
 
 var (
-	googleOuthConfig *oauth2.Config
+	googleOAuthConfig *oauth2.Config
 )
 
 // init sets up the OAuth2 configuration for google authentication.
@@ -29,7 +32,7 @@ func init() {
 		return
 	}
 
-	googleOuthConfig = &oauth2.Config{
+	googleOAuthConfig = &oauth2.Config{
 		ClientID:     googleClientID,
 		ClientSecret: googleClientSecret,
 		RedirectURL:  redirectURL,
@@ -39,4 +42,18 @@ func init() {
 		},
 		Endpoint: google.Endpoint,
 	}
+}
+
+// GoogleLoginHandler initiates the Google Oauth flow
+func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
+	if googleOAuthConfig == nil {
+		utils.DisplayError(w, http.StatusInternalServerError, "Goolgle OAuth not configured")
+		return
+	}
+
+	state := uuid.New().String()
+	setStateCookie(w, state)
+
+	url := googleOAuthConfig.AuthCodeURL(state)
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
