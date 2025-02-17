@@ -31,7 +31,7 @@ func init() {
 	redirectURL := os.Getenv("GOOGLE_REDIRECT_URL")
 
 	if googleClientID == "" || googleClientSecret == "" || redirectURL == "" {
-		log.Printf("Warning: Google 0Auth environment  variables not fully configured")
+		log.Printf("Warning: Google OAuth environment variables not fully configured")
 		return
 	}
 
@@ -41,7 +41,7 @@ func init() {
 		RedirectURL:  redirectURL,
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.profile",
-			"https://googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.email",
 		},
 		Endpoint: google.Endpoint,
 	}
@@ -50,7 +50,7 @@ func init() {
 // GoogleLoginHandler initiates the Google Oauth flow
 func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
 	if googleOAuthConfig == nil {
-		utils.DisplayError(w, http.StatusInternalServerError, "Goolgle OAuth not configured")
+		utils.DisplayError(w, http.StatusInternalServerError, "Google OAuth not configured")
 		return
 	}
 
@@ -85,10 +85,10 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get user Info from Gooogle
+	// Get user info from Google
 	googleUser, err := utils.GetGoogleUserInfo(token.AccessToken)
 	if err != nil {
-		log.Printf("Failed to get Goole User info: %v", err)
+		log.Printf("Failed to get Google user info: %v", err)
 		utils.DisplayError(w, http.StatusInternalServerError, "Failed to get user information")
 		return
 	}
@@ -102,7 +102,7 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	// Find or create user in our database
 	userID, err := utils.FindOrCreateGoogleUser(googleUser)
 	if err != nil {
-		log.Printf("Failed to process user:; %v", err)
+		log.Printf("Failed to process user: %v", err)
 		utils.DisplayError(w, http.StatusInternalServerError, "Failed to process user information")
 		return
 	}
