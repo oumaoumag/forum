@@ -63,7 +63,7 @@ func FindOrCreateGoogleUser(googleUser *models.GoogleUser) (int, error) {
 	}
 
 	result, err := db.DB.Exec(
-		"INSERT INTO users (email, username, password, auth_type, provider_id) VALUES (?,?,? 'google', ?)",
+		"INSERT INTO users (email, username, password, auth_type, provider_id) VALUES (?,?,?, 'google', ?)",
 		googleUser.Email,
 		username,
 		"oauth_placeholder", // Password placeholder

@@ -111,9 +111,9 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	expiration := time.Now().Add(24 * time.Hour)
 
 	_, err = db.DB.Exec(
-		`INSERT INTO session (session_id, user_id, expires_at) VALUES (?,?,?)`, sessionID, userID, expiration)
+		`INSERT INTO sessions (session_id, user_id, expires_at) VALUES (?,?,?)`, sessionID, userID, expiration)
 	if err != nil {
-		log.Printf("Failed to insert session into database: %v", err)
+		log.Printf("Failed to insert sessions into database: %v", err)
 		utils.DisplayError(w, http.StatusInternalServerError, "Failed to create session")
 		return
 	}
