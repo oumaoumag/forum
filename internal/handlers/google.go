@@ -55,7 +55,7 @@ func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	state := uuid.New().String()
-	models.SetStateCookie(w, state)
+	utils.SetStateCookie(w, state)
 
 	url := googleOAuthConfig.AuthCodeURL(state)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
@@ -70,7 +70,7 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Verify state
 	state := r.FormValue("state")
-	savedState := models.GetStateFromCookie(r)
+	savedState := utils.GetStateFromCookie(r)
 	if state != savedState {
 		utils.DisplayError(w, http.StatusBadRequest, "Invalid OAuth state")
 		return
