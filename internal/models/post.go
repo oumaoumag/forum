@@ -15,4 +15,5 @@ type Post struct {
 	LikeCount    int
 	DislikeCount int
 	CommentCount int
+	Imgurl string
 }
