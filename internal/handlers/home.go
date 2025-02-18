@@ -103,7 +103,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		var rawCategories string
 		var post models.Post
 		var created_at time.Time
-		err := rows.Scan(&post.PostID, &post.Title, &post.Content, &post.Imgurl , &post.Username, &post.UserID, &rawCategories, &created_at, &post.LikeCount, &post.DislikeCount, &post.CommentCount)
+		err := rows.Scan(&post.PostID, &post.Title, &post.Content, &post.Imgurl, &post.Username, &post.UserID, &rawCategories, &created_at, &post.LikeCount, &post.DislikeCount, &post.CommentCount)
 		if err != nil {
 			log.Println(err)
 			utils.DisplayError(w, http.StatusInternalServerError, "Error retrieving post data") // Enhanced error handling
@@ -162,6 +162,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		CurrentUserID int
 		Categories    []models.Categories
 		Name          string
+		UserImage     string
+		Bio           string
 	}{
 		Posts:         posts,
 		CurrentUserID: currentUserID,
@@ -169,7 +171,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		Name:          name,
 	}
 
-	tmpl, err := template.ParseFiles("web/templates/layout.html", "web/templates/home.html", "web/templates/sidebar.html")
+	tmpl, err := template.ParseFiles("web/templates/layout.html", "web/templates/home.html", "web/templates/sidebar.html", "web/templates/profile.html")
 	if err != nil {
 		log.Println(err)
 		utils.DisplayError(w, http.StatusInternalServerError, "server error")

@@ -1,4 +1,4 @@
-CREATE TABLE users_new (
+CREATE TABLE IF NOT EXISTS users (
     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL UNIQUE,
@@ -11,11 +11,7 @@ CREATE TABLE users_new (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO users_new (user_id, username, email, password, profile_picture, bio, created_at, updated_at)
-SELECT user_id, username, email, password, profile_picture, bio, created_at, updated_at FROM users;
 
-DROP TABLE users;
-ALTER TABLE users_new RENAME TO users;
 
 CREATE TABLE IF NOT EXISTS post_categories (
 	post_id INTEGER NOT NULL,

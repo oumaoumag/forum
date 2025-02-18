@@ -46,7 +46,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Render the form
-		tmpl, err := template.ParseFiles("web/templates/layout.html", "web/templates/post.html", "web/templates/sidebar.html")
+		tmpl, err := template.ParseFiles("web/templates/layout.html", "web/templates/post.html", "web/templates/sidebar.html", "web/templates/profile.html")
 		if err != nil {
 			utils.DisplayError(w, http.StatusInternalServerError, "server error")
 			return

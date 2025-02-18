@@ -23,8 +23,11 @@
       </nav>
     </header>
     <div class="container">
-      <aside>{{ template "sidebar" . }}</aside>
+      <aside class="profile-sidebar">{{ template "sidebar" . }}</aside>
       <main>{{ block "content" . }}{{ end }}</main>
+      {{ if $.CurrentUserID }}
+        <aside class="profile-sidebar">{{ template "profile" . }}</aside>
+      {{ end }}
     </div>
   </body>
   <script src="static/js/main.js"></script>

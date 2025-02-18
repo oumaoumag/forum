@@ -1,0 +1,8 @@
+{{ define "profile" }}
+<div class="profile-card">
+    <img src="{{.UserImage}}" alt="Profile picture" class="profile-image">
+    <h2 class="profile-name">{{.Name}}</h2>
+    <p class="profile-bio">{{.Bio}}</p>
+    <button class="edit-profile-btn">Edit Profile</button>
+</div>
+{{ end }}

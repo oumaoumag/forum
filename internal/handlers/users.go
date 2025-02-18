@@ -22,7 +22,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method == http.MethodGet {
-		tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/login.html", "web/templates/sidebar.html"))
+		tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/login.html", "web/templates/sidebar.html", "web/templates/profile.html"))
 		if err := tmpl.Execute(w, nil); err != nil {
 			log.Println(err)
 			utils.DisplayError(w, http.StatusInternalServerError, "Internal server error")
@@ -47,7 +47,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(errors) > 0 {
-			tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/login.html", "web/templates/sidebar.html"))
+			tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/login.html", "web/templates/sidebar.html", "web/templates/profile.html"))
 			if err := tmpl.Execute(w, errors); err != nil {
 				log.Println(err)
 			}
@@ -68,7 +68,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(errors) > 0 {
-			tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/login.html", "web/templates/sidebar.html"))
+			tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/login.html", "web/templates/sidebar.html", "web/templates/profile.html"))
 			if err := tmpl.Execute(w, errors); err != nil {
 				log.Println(err)
 			}
@@ -103,7 +103,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method == http.MethodGet {
-		tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/register.html", "web/templates/sidebar.html"))
+		tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/register.html", "web/templates/sidebar.html", "web/templates/profile.html"))
 		if err := tmpl.Execute(w, nil); err != nil {
 			log.Println(err)
 			utils.DisplayError(w, http.StatusInternalServerError, "Internal server error")
@@ -156,7 +156,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(errors) > 0 {
-			tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/register.html", "web/templates/sidebar.html"))
+			tmpl := template.Must(template.ParseFiles("web/templates/layout.html", "web/templates/register.html", "web/templates/sidebar.html", "web/templates/profile.html"))
 			if err := tmpl.Execute(w, errors); err != nil {
 				log.Println(err)
 			}
