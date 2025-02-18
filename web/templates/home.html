@@ -1,20 +1,23 @@
 {{ define "title" }}Home{{ end }} {{define "content"}}
 <h2>Forum Home Page</h2>
-<a href="/post/create" style="margin-bottom: 20px;"><button>Create Post</button></a>
+<a href="/post/create" style="margin-bottom: 20px"
+  ><button>Create Post</button></a
+>
 
 {{ if .Posts }} {{ range .Posts }}
 <div class="post">
   <h2>{{ .Title }}</h2>
   <p>
     <strong>Posted by:</strong> {{ .Username }} | <strong>Categories:</strong>
-    {{ range $index, $cat := .Categories }}
-      {{ if $index }}, {{ end }}
-      <span>{{ $cat }}</span>
-      {{ else }}
-        Uncategorized
-      {{ end }} | <strong>Created </strong> {{ .CreatedAt }}
+    {{ range $index, $cat := .Categories }} {{ if $index }}, {{ end }}
+    <span>{{ $cat }}</span>
+    {{ else }} Uncategorized {{ end }} | <strong>Created </strong> {{ .CreatedAt
+    }}
   </p>
   <p>{{ .Content }}</p>
+  {{ if .Imgurl}}
+  <img src="{{.Imgurl}}" alt="" style="height: 400px; width: 500px" />
+  {{end}}
   <div>
     <button
       id="like-post-{{ .PostID }}"
@@ -26,15 +29,13 @@
       id="dislike-post-{{ .PostID }}"
       onclick="reactToPost({{$.CurrentUserID}}, {{.PostID}}, 'dislike')"
     >
-      👎 <span id="post-dislike-count-{{ .PostID }}"
-        >{{ .DislikeCount }}</span
-      >
+      👎 <span id="post-dislike-count-{{ .PostID }}">{{ .DislikeCount }}</span>
     </button>
     <button onclick="OpenComments(('{{.PostID}}'))">
       Comments {{.CommentCount}}
     </button>
   </div>
-  <div class="close" id="{{.PostID}}" style="height: 290px; overflow-y: scroll;">
+  <div class="close" id="{{.PostID}}" style="height: 290px; overflow-y: scroll">
     <h3>Add a comment</h3>
     <form method="POST" action="/comment/create">
       <input type="hidden" name="post_id" value="{{ .PostID }}" />
@@ -50,15 +51,15 @@
         id="like-comment-{{ .CommentID }}"
         onclick="reactToComment({{$.CurrentUserID}}, {{.CommentID}}, 'like')"
       >
-        👍 <span id="comment-like-count-{{ .CommentID }}"
-          >{{ .LikeCount }}</span
-        >
+        👍
+        <span id="comment-like-count-{{ .CommentID }}">{{ .LikeCount }}</span>
       </button>
       <button
         id="dislike-comment-{{ .CommentID }}"
         onclick="reactToComment({{$.CurrentUserID}}, {{.CommentID}}, 'dislike')"
       >
-        👎 <span id="comment-dislike-count-{{ .CommentID }}"
+        👎
+        <span id="comment-dislike-count-{{ .CommentID }}"
           >{{ .DislikeCount }}</span
         >
       </button>
@@ -68,7 +69,6 @@
     {{ end }}
 
     <!-- Add Comment Form -->
-    
   </div>
 </div>
 {{ end }} {{ else }}
