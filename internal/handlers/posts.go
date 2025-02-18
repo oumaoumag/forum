@@ -2,8 +2,11 @@ package handlers
 
 import (
 	"html/template"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -54,7 +57,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else if r.Method == http.MethodPost {
 		// Parse form input
-		err := r.ParseForm()
+		err := r.ParseMultipartForm(20)
 		if err != nil {
 			utils.DisplayError(w, http.StatusBadRequest, "Invalid form data")
 
@@ -64,9 +67,27 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		title := r.FormValue("title")
 		content := r.FormValue("content")
 		categories := r.Form["category"]
+		file, headers, err := r.FormFile("img")
+		imgurl := ""
+
+		if err == nil {
+			dst, err := os.Create(filepath.Join("web/static/images", headers.Filename))
+			if err != nil {
+				utils.DisplayError(w, http.StatusInternalServerError, "server error")
+				return
+			}
+			_, err = io.Copy(dst, file)
+			if err != nil {
+				utils.DisplayError(w, http.StatusInternalServerError, "server error")
+				return
+			}
+			imgurl = dst.Name()
+			imgurl = strings.Replace(imgurl, "web", "..", 1)
+
+		}
 
 		// Validate inputs
-		if title == "" || content == ""{
+		if title == "" || content == "" {
 			utils.DisplayError(w, http.StatusBadRequest, "All fields are required")
 			return
 		}
@@ -79,7 +100,12 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		query := `
 			INSERT INTO posts (user_id, title, content)
 			VALUES (?, ?, ?)`
-		result, err := db.DB.Exec(query, userID, title, content)
+		if imgurl != "" {
+			query = `
+			INSERT INTO posts (user_id, title, content, imgurl)
+			VALUES (?, ?, ?,?)`
+		}
+		result, err := db.DB.Exec(query, userID, title, content, imgurl)
 		if err != nil {
 			log.Println(err)
 			utils.DisplayError(w, http.StatusInternalServerError, "Unable to create post")

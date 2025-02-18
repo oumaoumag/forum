@@ -35,7 +35,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Build base query
 	query := `
-    SELECT p.post_id, p.title, p.content, u.username, u.user_id,
+    SELECT p.post_id, p.title, p.content, COALESCE(p.imgurl, "") AS imgurl , u.username, u.user_id,
 		COALESCE(GROUP_CONCAT(DISTINCT c.name), '') AS categories,
 		p.created_at,
         (SELECT COUNT(*) FROM likes WHERE post_id = p.post_id AND comment_id IS NULL AND like_type = 'like') AS like_count,
@@ -103,7 +103,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		var rawCategories string
 		var post models.Post
 		var created_at time.Time
-		err := rows.Scan(&post.PostID, &post.Title, &post.Content, &post.Username, &post.UserID, &rawCategories, &created_at, &post.LikeCount, &post.DislikeCount, &post.CommentCount)
+		err := rows.Scan(&post.PostID, &post.Title, &post.Content, &post.Imgurl , &post.Username, &post.UserID, &rawCategories, &created_at, &post.LikeCount, &post.DislikeCount, &post.CommentCount)
 		if err != nil {
 			log.Println(err)
 			utils.DisplayError(w, http.StatusInternalServerError, "Error retrieving post data") // Enhanced error handling
