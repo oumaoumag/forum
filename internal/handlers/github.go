@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
+	
 	"fmt"
 	"log"
 	"net/http"
@@ -16,11 +16,13 @@ import (
 	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
+	"forum/internal/hub"
+	
 )
 
 var (
 	githubOAuthConfig *oauth2.Config
-	oauthStateString  = uuid.New().String() // Using UUID for better security
+	//oauthStateString  = uuid.New().String() // Using UUID for better security
 )
 
 func init() {
@@ -51,66 +53,79 @@ func init() {
 	}
 }
 
-// GitHubUser represents the GitHub user data we need
-type GitHubUser struct {
-	Login string `json:"login"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
-}
+
 
 // GitHubLoginHandler initiates the GitHub OAuth flow
 func GitHubLoginHandler(w http.ResponseWriter, r *http.Request) {
 	if githubOAuthConfig == nil {
-		utils.DisplayError(w, http.StatusInternalServerError, "GitHub OAuth not configured")
+		utils.DisplayError(w, http.StatusInternalServerError, "Github OAuth not configured")
 		return
 	}
 
-	url := githubOAuthConfig.AuthCodeURL(oauthStateString)
+	state := uuid.New().String()
+	hub.SetStateCookie(w, state)
+
+	url := githubOAuthConfig.AuthCodeURL(state)
+	
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
-
-// In github.go
 
 // GitHubCallbackHandler handles the OAuth callback from GitHub
 func GitHubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	if githubOAuthConfig == nil {
-		utils.DisplayError(w, http.StatusInternalServerError, "GitHub OAuth not configured")
+		utils.DisplayError(w, http.StatusInternalServerError, "Github OAuth not configured")
 		return
 	}
 
-	// Verify state to prevent CSRF
+	// Verify state
 	state := r.FormValue("state")
-	if state != oauthStateString {
+	savedState := hub.GetStateFromCookie(r)
+
+
+	if state != savedState {
 		utils.DisplayError(w, http.StatusBadRequest, "Invalid OAuth state")
 		return
 	}
 
 	// Exchange code for token
 	code := r.FormValue("code")
+	if code == "" {
+		utils.DisplayError(w, http.StatusBadRequest, "Authorization code missing")
+		return
+	}
+
+	
+
+	// Get user info from GitHub
 	token, err := githubOAuthConfig.Exchange(context.Background(), code)
 	if err != nil {
-		log.Printf("Code exchange failed: %v", err)
+		log.Printf("Code exchange failed: %v", err) // Detailed logging
 		utils.DisplayError(w, http.StatusInternalServerError, "Failed to complete authentication")
 		return
 	}
 
-	// Get user info from GitHub
-	githubUser, err := getGitHubUserInfo(token.AccessToken)
+	githubUser, err := hub.GetGitHubUserInfo(token.AccessToken)
 	if err != nil {
 		log.Printf("Failed to get GitHub user info: %v", err)
 		utils.DisplayError(w, http.StatusInternalServerError, "Failed to get user information")
 		return
 	}
 
+	// Ensure email is verified
+	if !githubUser.VerifiedEmail {
+		utils.DisplayError(w, http.StatusForbidden, "Email not verified with Github")
+		return
+	}
+
 	// Find or create user in our database
-	userID, err := findOrCreateUser(githubUser)
+	userID, err := hub.FindOrCreateUser(githubUser)
 	if err != nil {
 		log.Printf("Failed to process user: %v", err)
 		utils.DisplayError(w, http.StatusInternalServerError, "Failed to process user information")
 		return
 	}
 
-	log.Printf("Successfully found/created user with ID: %d", userID) // Debug log
+	
 
 	// Delete any existing sessions for this user
 	if err := deleteExistingSessions(userID); err != nil {
@@ -149,6 +164,7 @@ func GitHubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+
 // Helper function to delete existing sessions
 func deleteExistingSessions(userID int) error {
 	_, err := db.DB.Exec(`DELETE FROM sessions WHERE user_id = ?`, userID)
@@ -158,64 +174,6 @@ func deleteExistingSessions(userID int) error {
 	return nil
 }
 
-// getGitHubUserInfo fetches the user's information from GitHub
-func getGitHubUserInfo(accessToken string) (*GitHubUser, error) {
-	req, err := http.NewRequest("GET", "https://api.github.com/user", nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
 
-	req.Header.Set("Authorization", "Bearer "+accessToken)
-	req.Header.Set("Accept", "application/json")
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get user info: %w", err)
-	}
-	defer resp.Body.Close()
 
-	var user GitHubUser
-	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
-		return nil, fmt.Errorf("failed to decode user info: %w", err)
-	}
-
-	return &user, nil
-}
-
-// findOrCreateUser either finds an existing user or creates a new one
-func findOrCreateUser(githubUser *GitHubUser) (int, error) {
-	var userID int
-	username := githubUser.Login
-	if username == "" {
-		username = "github_user_" + uuid.New().String()[:8]
-	}
-
-	// Check if user exists by email
-	err := db.DB.QueryRow("SELECT user_id FROM users WHERE email = ?", githubUser.Email).Scan(&userID)
-	if err == nil {
-		// User exists, update username if necessary
-		_, err = db.DB.Exec("UPDATE users SET username = ? WHERE user_id = ?", username, userID)
-		return userID, err
-	}
-
-	// If user doesn't exist, create a new user
-	fakePassword := "oauth_placeholder" // Placeholder password for OAuth users
-
-	result, err := db.DB.Exec(
-		"INSERT INTO users (email, username, password, auth_type) VALUES (?, ?, ?, 'github')",
-		githubUser.Email,
-		username,
-		fakePassword,
-	)
-	if err != nil {
-		return 0, fmt.Errorf("failed to create user: %w", err)
-	}
-
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("failed to get new user ID: %w", err)
-	}
-
-	return int(id), nil
-}
