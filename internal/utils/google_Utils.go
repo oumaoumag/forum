@@ -3,10 +3,11 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"forum/internal/db"
-	"forum/internal/models"
 	"net/http"
 	"time"
+
+	"forum/internal/db"
+	"forum/internal/models"
 
 	"github.com/google/uuid"
 )
@@ -63,11 +64,12 @@ func FindOrCreateGoogleUser(googleUser *models.GoogleUser) (int, error) {
 	}
 
 	result, err := db.DB.Exec(
-		"INSERT INTO users (email, username, password, auth_type, provider_id) VALUES (?,?,?, 'google', ?)",
+		"INSERT INTO users (email, username, password, auth_type, provider_id, profile_picture) VALUES (?,?,?, 'google', ?,?)",
 		googleUser.Email,
 		username,
-		"oauth_placeholder", // Password placeholder
+		"oauth_placeholder",
 		googleUser.ID,
+		googleUser.Picture,
 	)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create user: %w", err)

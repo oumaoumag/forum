@@ -33,7 +33,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		// Fetch categories to display in the form
 		categories := utils.FetchCategories()
-		name, _ := db.GetUser(currentUserID)
+		userDetails, _ := db.GetUser(currentUserID)
 
 		data := struct {
 			CurrentUserID int
@@ -42,7 +42,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		}{
 			CurrentUserID: currentUserID,
 			Categories:    categories,
-			Name:          name,
+			Name:          userDetails[0],
 		}
 
 		// Render the form

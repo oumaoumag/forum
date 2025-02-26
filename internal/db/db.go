@@ -95,13 +95,18 @@ func ScheduleSessionCleanup(interval time.Duration, cleanupFunc func() error) {
 	}
 }
 
-func GetUser(id int) (string, error) {
+func GetUser(id int) ([]string, error) {
 	var name string
+	var img string
+	var bio string
+	var output []string
 
 	qry := `
-	SELECT username FROM users WHERE user_id = ?
+	SELECT username, COALESCE(bio, "") AS bio, COALESCE(profile_picture, "") AS profile_picture FROM users WHERE user_id = ?
 	`
-	err := DB.QueryRow(qry, id).Scan(&name)
+	
+	err := DB.QueryRow(qry, id).Scan(&name, &bio, &img)
+	output = append(output, name, bio, img)
 
-	return name, err
+	return output, err
 }

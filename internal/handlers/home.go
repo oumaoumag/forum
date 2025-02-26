@@ -155,7 +155,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	categories := utils.FetchCategories()
 
-	name, _ := db.GetUser(currentUserID)
+	userDetails, _ := db.GetUser(currentUserID)
 
 	data := struct {
 		Posts         []models.Post
@@ -168,7 +168,9 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		Posts:         posts,
 		CurrentUserID: currentUserID,
 		Categories:    categories,
-		Name:          name,
+		Name:          userDetails[0],
+		Bio:           userDetails[1],
+		UserImage:     userDetails[2],
 	}
 
 	tmpl, err := template.ParseFiles("web/templates/layout.html", "web/templates/home.html", "web/templates/sidebar.html", "web/templates/profile.html")

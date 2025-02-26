@@ -3,10 +3,10 @@ package hub
 import (
 	"encoding/json"
 	"fmt"
-	"forum/internal/db"
-
 	"net/http"
 	"time"
+
+	"forum/internal/db"
 
 	"github.com/google/uuid"
 )
@@ -31,7 +31,7 @@ func FindOrCreateUser(githubUser *GitHubUser) (int, error) {
 	if err == nil {
 		return userID, nil
 	}
-	
+
 	// Check if user exists by email
 	// Fallback check by email
 	err = db.DB.QueryRow("SELECT user_id FROM users WHERE email = ?", githubUser.Email).Scan(&userID)
@@ -46,11 +46,12 @@ func FindOrCreateUser(githubUser *GitHubUser) (int, error) {
 	}
 
 	result, err := db.DB.Exec(
-		"INSERT INTO users (email, username, password, auth_type, provider_id) VALUES (?,?,?, 'github', ?)",
+		"INSERT INTO users (email, username, password, auth_type, provider_id, profile_picture) VALUES (?,?,?, 'github', ?,?)",
 		githubUser.Email,
 		username,
 		"oauth_placeholder", // Password placeholder
 		githubUser.ID,
+		githubUser.Picture,
 	)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create user: %w", err)
@@ -126,12 +127,14 @@ type GitHubEmail struct {
 
 // GitHubUser represents the GitHub user data we need
 type GitHubUser struct {
-	Login string `json:"login"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
-	ID        int `json:"id"`
+	Login         string `json:"login"`
+	Email         string `json:"email"`
+	Name          string `json:"name"`
+	ID            int    `json:"id"`
 	VerifiedEmail bool   `json:"verified_email"`
+	Picture       string `json:"avatar_url"`
 }
+
 // Function to set the state cookie
 func SetStateCookie(w http.ResponseWriter, state string) {
 	http.SetCookie(w, &http.Cookie{
@@ -140,7 +143,7 @@ func SetStateCookie(w http.ResponseWriter, state string) {
 		Expires:  time.Now().Add(24 * time.Hour),
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,  // Set to true in production for HTTPS
+		Secure:   true, // Set to true in production for HTTPS
 		SameSite: http.SameSiteLaxMode,
 	})
 }
@@ -149,8 +152,7 @@ func SetStateCookie(w http.ResponseWriter, state string) {
 func GetStateFromCookie(r *http.Request) string {
 	cookie, err := r.Cookie("oauth_state")
 	if err != nil {
-		
-		return ""  // Return empty string if cookie is not found
+		return "" // Return empty string if cookie is not found
 	}
 	return cookie.Value
 }
