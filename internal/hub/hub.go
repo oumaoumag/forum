@@ -46,12 +46,11 @@ func FindOrCreateUser(githubUser *GitHubUser) (int, error) {
 	}
 
 	result, err := db.DB.Exec(
-		"INSERT INTO users (email, username, password, auth_type, provider_id, profile_picture) VALUES (?,?,?, 'github', ?,?)",
+		"INSERT INTO users (email, username, password, auth_type, provider_id) VALUES (?,?,?, 'github', ?)",
 		githubUser.Email,
 		username,
 		"oauth_placeholder", // Password placeholder
 		githubUser.ID,
-		githubUser.Picture,
 	)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create user: %w", err)
@@ -132,7 +131,6 @@ type GitHubUser struct {
 	Name          string `json:"name"`
 	ID            int    `json:"id"`
 	VerifiedEmail bool   `json:"verified_email"`
-	Picture       string `json:"avatar_url"`
 }
 
 // Function to set the state cookie

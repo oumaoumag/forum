@@ -143,4 +143,4 @@ We love collaboration! Pull requests are welcome, and for major changes, please 
 [Brian Oiko](https://github.com/Brace1000)
 
 
-[Sheilah  juma](https://learn.zone01kisumu.ke/git/sjuma)
+[Sheilla  juma](https://learn.zone01kisumu.ke/git/sjuma)

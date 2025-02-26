@@ -1,9 +1,15 @@
 {{ define "profile" }}
 <div class="profile-card">
-    
+    {{if .UserImage}}
     <img src="{{.UserImage}}" alt="Profile picture" class="profile-image">
+    {{else}}
+    <img src="../static//profile_avatar.jpg" alt="Profile picture" class="profile-image">
+
+    {{end}}
     <h2 class="profile-name">{{.Name}}</h2>
+    {{if .Bio}}
     <p class="profile-bio">{{.Bio}}</p>
+    {{end}}
     <button class="edit-profile-btn">Edit Profile</button>
 </div>
 {{ end }}
