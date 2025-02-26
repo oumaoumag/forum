@@ -2,9 +2,13 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -16,7 +20,6 @@ import (
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	
 	if r.URL.Path != "/login" {
 		utils.DisplayError(w, http.StatusNotFound, " page not found")
 		return
@@ -112,7 +115,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == http.MethodPost {
-		if err := r.ParseForm(); err != nil {
+		if err := r.ParseMultipartForm(20); err != nil {
 			utils.DisplayError(w, http.StatusBadRequest, "Failed to parse form")
 			return
 		}
@@ -121,6 +124,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		email := strings.TrimSpace(r.FormValue("email"))
 		password := r.FormValue("password")
 		confirmPass := r.FormValue("confirmpassword")
+		bio := r.FormValue("bio")
 
 		errors := make(map[string]string)
 
@@ -144,8 +148,19 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			errors["password"] = "Invalid password, please use at least one of lower case, uppercase, digits and special characters"
 		}
 
+		file, headers, err := r.FormFile("img")
+		imgurl := ""
+		if err == nil {
+			dst, err := os.Create(filepath.Join("web/static/images", headers.Filename))
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			io.Copy(dst, file)
+			imgurl = strings.Replace(dst.Name(), "web", "..", 1)
+		}
+
 		var exists bool
-		err := db.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE email = ? OR username = ?)`, email, username).Scan(&exists)
+		err = db.DB.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE email = ? OR username = ?)`, email, username).Scan(&exists)
 		if err != nil && err != sql.ErrNoRows {
 			log.Printf("Database query error: %v", err)
 			utils.DisplayError(w, http.StatusInternalServerError, "Server error")
@@ -169,8 +184,12 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			utils.DisplayError(w, http.StatusInternalServerError, "Server error")
 			return
 		}
+		query := `INSERT INTO users (username, email, password, bio) VALUES (?, ?, ?,?)`
+		if imgurl != "" {
+			query = `INSERT INTO users (username, email, password,bio, profile_picture) VALUES (?, ?, ?,?,?)`
 
-		_, err = db.DB.Exec(`INSERT INTO users (username, email, password) VALUES (?, ?, ?)`, username, email, hashedPassword)
+		}
+		_, err = db.DB.Exec(query, username, email, hashedPassword,bio, imgurl)
 		if err != nil {
 			log.Printf("Database insert error: %v", err)
 			utils.DisplayError(w, http.StatusInternalServerError, "Failed to register user")
