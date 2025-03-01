@@ -122,3 +122,13 @@ function OpenComments(id) {
 
   comments.classList.toggle("close");
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('login_success')) {
+    window.history.replaceState({}, document.title, window.Location.pathname);
+
+      window.location.reload(true);
+    }
+  }
+});
