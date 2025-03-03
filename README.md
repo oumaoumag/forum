@@ -1,10 +1,8 @@
-
 # Forum-Authentication
 
 ## Objectives
 
 This project is a web forum with the following functionality:
-
 
 - **Communication between users**: Users can interact by creating posts and comments.
 - **Image Upload**: Users can also interact by uploading images to the posts they are trying to make.
@@ -28,13 +26,9 @@ SQLite enables creating and controlling a database using queries. To learn more 
 
 The forum supports user authentication through the following methods:
 
-
-
-
 - **Registration**:
   - Users can register with a unique username and email.
   - A password is required during registration, and it is encrypted before storing.
-  
 - **Login**:
   - Users can log in using their email and password.
   - If the credentials are incorrect, an error response is returned.
@@ -43,8 +37,6 @@ The forum supports user authentication through the following methods:
 
 - User sessions are managed using **cookies** to keep users logged in.
 
-
-
 ## Communication
 
 To facilitate communication among users:
@@ -52,7 +44,6 @@ To facilitate communication among users:
 - **Registered users**:
   - Can create posts and comments.
   - Posts can be associated with one or more categories (you decide the categories).
-  
 - **Non-registered users**:
   - Can only view posts and comments.
 
@@ -73,38 +64,31 @@ The forum includes a filtering mechanism to:
 - Display posts created by the logged-in user (**created posts**).
 - Display posts liked by the logged-in user (**liked posts**).
 
-
-
-
 ## Docker Usage
 
 ### Building the Docker Image
 
-
-
- Navigate to the root directory of your project.
-2. Run the following command to build the Docker image:
+Navigate to the root directory of your project. 2. Run the following command to build the Docker image:
 
 ```bash
 
    docker build -t <image name> -f docker/Dockerfile .
-   ```
+```
 
-  
 ## Running the Docker Container in the server
 
-
-
- ```bash
+```bash
 docker run -it -p 8080:8080 <name of the image>
 
-   ```
+```
+
 ## To Run in the container
 
 ```bash
 
 docker container run -d -p 8080:8080 --name forum <name of container>
 ```
+
 ## How to run the application
 
 1. Clone the Repository:
@@ -112,15 +96,13 @@ docker container run -d -p 8080:8080 --name forum <name of container>
 ```
    git clone https://learn.zone01kisumu.ke/git/oumouma/forum-authentication.git
 cd forum
-   ```
+```
 
 2. Run the following command:
 
-   
-
 ```
    go run /cmd/main.go
-   ```
+```
 
 3. On your Web Browser:
 
@@ -130,7 +112,7 @@ cd forum
 
 ## Contributing
 
-We love collaboration! Pull requests are welcome, and for major changes, please open an issue first to discuss your ideas. Let’s make this project even better together! 
+We love collaboration! Pull requests are welcome, and for major changes, please open an issue first to discuss your ideas. Let’s make this project even better together!
 
 ## Authors
 
@@ -138,9 +120,8 @@ We love collaboration! Pull requests are welcome, and for major changes, please 
 
 [Vallary Muhembe](https://learn.zone01kisumu.ke/git/vmuhembe/forum.git)
 
-[Ouma Ouma](https://learn.zone01kisumu.ke/git/oumouma)
+[Ouma Ouma](https://learn.zone01kisumu.ke/git/oumouma/forum-authentication.git)
 
 [Brian Oiko](https://github.com/Brace1000)
 
-
-[Sheilla  juma](https://learn.zone01kisumu.ke/git/sjuma)
+[Sheilla juma](https://learn.zone01kisumu.ke/git/sjuma)
