@@ -22,7 +22,6 @@ func DisplayError(w http.ResponseWriter, code int, message string) {
 		return
 	}
 
-	w.WriteHeader(code)
 
 	if err := tmpl.Execute(w, data); err != nil {
 		log.Printf("Error executing template: %v", err)

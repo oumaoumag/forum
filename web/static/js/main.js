@@ -1,13 +1,13 @@
 // Function to handle like/dislike for a post
 async function reactToPost(userId, postId, likeType) {
-  console.log('UserID:', userId);
-    console.log('PostID:', postId);
-    console.log('LikeType:', likeType);
+  console.log("UserID:", userId);
+  console.log("PostID:", postId);
+  console.log("LikeType:", likeType);
   if (userId == 0) {
-    window.location.href = "/login"
-    return
+    window.location.href = "/login";
+    return;
   }
-  
+
   try {
     const response = await fetch("/like", {
       method: "POST",
@@ -38,8 +38,8 @@ async function reactToPost(userId, postId, likeType) {
 // Function to handle like/dislike for a comment
 async function reactToComment(userId, commentId, likeType) {
   if (userId == 0) {
-    window.location.href = "/login"
-    return
+    window.location.href = "/login";
+    return;
   }
 
   try {
@@ -123,12 +123,11 @@ function OpenComments(id) {
   comments.classList.toggle("close");
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.has('login_success')) {
+  if (urlParams.has("login_success")) {
     window.history.replaceState({}, document.title, window.Location.pathname);
 
-      window.location.reload(true);
-    }
+    window.location.reload(true);
   }
 });

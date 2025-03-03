@@ -52,7 +52,7 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err = tmpl.Execute(w, data); err != nil {
-			http.Error(w, "Error rendering template", http.StatusInternalServerError)
+			utils.DisplayError(w, http.StatusInternalServerError, "server error")
 			return
 		}
 	} else if r.Method == http.MethodPost {
