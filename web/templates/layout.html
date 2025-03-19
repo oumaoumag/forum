@@ -23,10 +23,10 @@
       </nav>
     </header>
     <div class="container">
-      <aside class="profile-sidebar">{{ template "sidebar" . }}</aside>
+      <aside class="profile-sidebar ">{{ template "sidebar" . }}</aside>
       <main>{{ block "content" . }}{{ end }}</main>
       {{ if $.CurrentUserID }}
-        <aside class="profile-sidebar">{{ template "profile" . }}</aside>
+        <aside class="profile-sidebar profile">{{ template "profile" . }}</aside>
       {{ end }}
     </div>
   </body>

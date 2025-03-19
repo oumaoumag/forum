@@ -251,24 +251,6 @@ footer {
   border-radius: 10px 10px 0 0;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  nav {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  main {
-    padding: 1.5rem;
-  }
-
-  form input,
-  form textarea,
-  form select,
-  form button {
-    font-size: 0.9rem;
-  }
-}
 .social-btn {
   display: flex;
   align-items: center;
@@ -289,11 +271,10 @@ footer {
   flex-direction: row;
   gap: 1rem;
   margin: 1.5rem 0;
-  
 }
 
 .social-btn img {
-  width: 24px;  /* Adjust this value as needed */
+  width: 24px; /* Adjust this value as needed */
   height: 24px; /* Adjust this value as needed */
   object-fit: contain;
 }
@@ -303,14 +284,12 @@ footer {
 }
 
 .profile-sidebar {
-  width: 280px;
   justify-self: center;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   padding: 20px;
-  position: sticky;
-  top: 80px;
+  margin-bottom: 10px;
   height: fit-content;
 }
 
@@ -345,4 +324,47 @@ footer {
   margin-bottom: 15px;
   padding: 0 10px;
 }
+.img {
+  height: 400px;
+  width: 100%
+}
 
+/* Responsive Design */
+@media (max-width: 600px) {
+  .container {
+    display: flex;
+    flex-direction: column;
+  }
+  nav {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  main {
+    padding: 1.5rem;
+  }
+
+  form input,
+  form textarea,
+  form select,
+  form button {
+    font-size: 0.9rem;
+  }
+  .profile {
+    display: none;
+  }
+
+  .sidebar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .posts,
+  .liked {
+    display: flex;
+    justify-content: space-around;
+  }
+  .img {
+    width: 100%;
+  }
+}
