@@ -39,10 +39,14 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 			CurrentUserID int
 			Categories    []models.Categories
 			Name          string
+			UserImage string
+			Bio string
 		}{
 			CurrentUserID: currentUserID,
 			Categories:    categories,
 			Name:          userDetails[0],
+			Bio: userDetails[1],
+			UserImage: userDetails[2],
 		}
 
 		// Render the form
