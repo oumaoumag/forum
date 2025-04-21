@@ -16,7 +16,7 @@ import (
 func main() {
 	// Initialize the database
 	if err := db.Init("./forum.db"); err != nil {
-		log.Fatal("Database initialization failed: ", e\rr)
+		log.Fatal("Database initialization failed: ", err)
 	}
 
 	go db.ScheduleSessionCleanup(1*time.Hour, db.CleanupExpiredSessions)
@@ -52,7 +52,5 @@ func main() {
 	srv := server.New(config)
 	if err := srv.Start(); err != nil {
 		log.Fatal("Server error:", err)
-	} 
-
-	
+	} 	
 }
