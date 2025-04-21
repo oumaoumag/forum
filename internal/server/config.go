@@ -3,6 +3,7 @@ package server
 import (
 	"crypto/tls"
 	"net/http"
+	"path/filepath"
 )
 
 type ServerConfig struct {
@@ -17,8 +18,8 @@ func NewDefaultConfig(handler http.Handler) *ServerConfig {
 	return &ServerConfig{
 		HTTPAddr: ":80",
 		HTTPSAddr: ":443",
-		CertFile: "server.crt",
-		KeyFile: "server.key",
+		CertFile: filepath.Join("certs", "server.crt"),
+		KeyFile: filepath.Join("server.key"),
 		Handler: handler,
 
 	}
