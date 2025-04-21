@@ -1,6 +1,7 @@
 # SSL Certificates
 
 This directory contains SSL/TLS certificates for the server.
+To generate certs automatically use run the script in the scripts folder and follow the instructions.
 
 ## Required Files
 - `server.crt` - SSL certificate
