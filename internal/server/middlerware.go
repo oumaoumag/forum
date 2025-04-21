@@ -42,6 +42,43 @@ func (rl *RateLimiter) cleanUp() {
 		}
 	}
 }
+// Limit - middleware that implements rate limiting
+func (rl *RateLimiter) Limit(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		clientIP := r.RemoteAddr
+
+		rl.mu.Lock()
+
+		// Initialize client's record if not exists
+		if _, exists := rl.requests[clientIP]; !exists {
+			rl.requests[clientIP] = &clientRequests{}
+		}
+
+		// Get existing client's record
+		clientReq := rl.requests[clientIP]
+
+		// reset count if time has passed
+		if time.Since(clientReq.lastSeen) > rl.window {
+			clientReq.count = 0
+		}
+
+		// Increament the request counter and update timestamp
+		clientReq.count++
+		clientReq.lastSeen = time.Now()
+
+		// check limit
+		if clientReq.count > rl.limit {
+			rl.mu.Unlock()
+			http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
+			return
+		}
+
+		rl.mu.Unlock()
+		// if rate limit not exceeded, continue to next handler
+		next.ServeHTTP(w, r)
+	})
+}
 
 // handles HTTP to HTTPS redirection:
 func redirectToHTTPS(next http.Handler) http.Handler {
