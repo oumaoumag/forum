@@ -24,12 +24,14 @@ dist/
 .env.local
 .env.*.local
 
-# SSL/TLS Certificates
-*.pem
-*.key
-*.crt
-*.csr
-*.cert
+ SSL/TLS Certificates
+certs/*.pem
+certs/*.key
+certs/*.crt
+certs/*.csr
+certs/*.cert
+# Keep the certs directory structure
+!certs/.gitkeep
 
 # Database files
 *.db
