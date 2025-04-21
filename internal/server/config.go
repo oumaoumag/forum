@@ -7,20 +7,20 @@ import (
 )
 
 type ServerConfig struct {
-	HTTPAddr string
-	HTTPSAddr string
-	CertFile string
-	KeyFile  string
-	Handler http.Handler
+	HTTPAddr 	string
+	HTTPSAddr 	string
+	CertFile 	string
+	KeyFile  	string
+	Handler 	http.Handler
 }
 
 func NewDefaultConfig(handler http.Handler) *ServerConfig {
 	return &ServerConfig{
-		HTTPAddr: ":80",
-		HTTPSAddr: ":443",
-		CertFile: filepath.Join("certs", "server.crt"),
-		KeyFile: filepath.Join("server.key"),
-		Handler: handler,
+		HTTPAddr: 	":80",
+		HTTPSAddr: 	":443",
+		CertFile: 	filepath.Join("certs", "server.crt"),
+		KeyFile: 	filepath.Join("server.key"),
+		Handler: 	handler,
 
 	}
 }
@@ -36,5 +36,6 @@ func createTLSConfig() *tls.Config {
 			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
 		},
 		PreferServerCipherSuites: true,
+		
 	}
 }
