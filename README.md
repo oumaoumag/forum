@@ -1,4 +1,4 @@
-# Forum-Authentication
+# Forum
 
 ## Objectives
 
