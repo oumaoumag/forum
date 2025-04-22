@@ -1,3 +1,4 @@
+# ---> Go
 # If you prefer the allow list template instead of the deny list, see community template:
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
@@ -19,7 +20,10 @@
 
 # Go workspace file
 go.work
+<<<<<<< HEAD
 go.work.sum
 
 # env file
 .env
+=======
+>>>>>>> master

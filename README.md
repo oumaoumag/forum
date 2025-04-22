@@ -1,141 +1,127 @@
-# SPEC-01: Web Forum  
+# Forum-Authentication
 
-## Background  
+## Objectives
 
-This project aims to develop a web-based forum where users can communicate through posts and comments. The forum should support user authentication, post categorization, and a reaction system (likes/dislikes). Additionally, the system must allow filtering of posts based on categories and user activity.  
+This project is a web forum with the following functionality:
 
-### Key Technical Constraints  
-
-- **Backend**: Go (Golang)  
-- **Database**: SQLite  
-- **Frontend**: Plain HTML (no JS frameworks)  
-- **Containerization**: Docker  
-
-### Learning Outcomes  
-
-This project serves as a learning experience in:  
-- Web development fundamentals (HTML, HTTP, sessions, cookies)  
-- SQL database handling using SQLite  
-- Encryption techniques (password hashing)  
-- Containerization with Docker  
-
-## Requirements  
-
-The web forum must meet the following functional and technical requirements:  
-
-### Must-Have (Mandatory)  
-- User authentication (registration & login) using email, username, and password.  
-- Store user credentials securely (hashed passwords recommended).  
-- Users can create posts and comments.  
-- Posts can be categorized.  
-- Users can like/dislike posts and comments.  
-- Filtering functionality for posts:  
-  - By categories (subforums).  
-  - By posts created by the logged-in user.  
-  - By posts liked by the logged-in user.  
-- Guest users (non-registered) can view posts and comments but cannot interact.  
-- Session management with cookies (with expiration time).  
-- SQLite as the database with at least:  
-  - One `SELECT` query.  
-  - One `CREATE` query.  
-  - One `INSERT` query.  
-- Proper HTTP error handling and status codes.  
-- Containerized using Docker.  
-- Code must follow good practices, including unit tests.  
-
-### Should-Have (Recommended)  
-- UUIDs for users and posts for better identification.  
-- Encrypted password storage (bcrypt).  
-
-### Could-Have (Optional)  
-- A simple admin panel for moderating posts/comments.  
-- Support for user avatars (profile pictures).  
-
-### Won't-Have (Out of Scope)  
-- No external frontend frameworks (React, Vue, etc.).  
-- No real-time chat/messaging.                              - Maybe implemented.
-- No advanced analytics or reporting.                       - Maybe implemented.
-
-## Method  
-
-### System Architecture  
-
-The forum follows a **three-layer architecture**:  
-
-1. **Frontend (Presentation Layer)**  
-   - Plain HTML with basic CSS for UI.  
-   - Uses standard form submissions (no JavaScript frameworks).  
-
-2. **Backend (Application Layer - Go)**  
-   - Handles authentication, post management, comments, and filtering.  
-   - Uses the `net/http` package to manage routes and requests.  
-
-3. **Database (Data Layer - SQLite)**  
-   - Stores users, posts, comments, likes/dislikes, and categories.  
-   - Uses `github.com/mattn/go-sqlite3` for SQLite integration in Go.  
-
-**High-Level Component Diagram:**  
-
-```plantuml
-@startuml
-actor User
-User --> WebServer : HTTP Requests
-WebServer --> SQLite : SQL Queries
-@enduml
-```
-### Database Schema  
-
-The forum will use an SQLite database with the following tables:  
-
-#### `users` (Stores user information)  
-| Column      | Type         | Constraints                  |  
-|------------|-------------|------------------------------|  
-| id         | INTEGER     | PRIMARY KEY, AUTOINCREMENT  |  
-| email      | TEXT        | UNIQUE, NOT NULL           |  
-| username   | TEXT        | UNIQUE, NOT NULL           |  
-| password   | TEXT        | NOT NULL (hashed)          |  
-| created_at | TIMESTAMP   | DEFAULT CURRENT_TIMESTAMP  |  
-
-#### `posts` (Stores forum posts)  
-| Column      | Type        | Constraints                  |  
-|------------|------------|------------------------------|  
-| id         | INTEGER    | PRIMARY KEY, AUTOINCREMENT  |  
-| user_id    | INTEGER    | FOREIGN KEY → users(id)    |  
-| title      | TEXT       | NOT NULL                     |  
-| content    | TEXT       | NOT NULL                     |  
-| created_at | TIMESTAMP  | DEFAULT CURRENT_TIMESTAMP  |  
-
-#### `comments` (Stores comments on posts)  
-| Column      | Type        | Constraints                  |  
-|------------|------------|------------------------------|  
-| id         | INTEGER    | PRIMARY KEY, AUTOINCREMENT  |  
-| user_id    | INTEGER    | FOREIGN KEY → users(id)    |  
-| post_id    | INTEGER    | FOREIGN KEY → posts(id)    |  
-| content    | TEXT       | NOT NULL                     |  
-| created_at | TIMESTAMP  | DEFAULT CURRENT_TIMESTAMP  |  
-
-#### `categories` (Stores post categories)  
-| Column  | Type     | Constraints                  |  
-|---------|---------|------------------------------|  
-| id      | INTEGER | PRIMARY KEY, AUTOINCREMENT  |  
-| name    | TEXT    | UNIQUE, NOT NULL           |  
-
-#### `post_categories` (Associates posts with categories)  
-| Column    | Type     | Constraints                  |  
-|-----------|---------|------------------------------|  
-| post_id   | INTEGER | FOREIGN KEY → posts(id)    |  
-| category_id | INTEGER | FOREIGN KEY → categories(id) |  
-| PRIMARY KEY (post_id, category_id) |  
-
-#### `likes_dislikes` (Stores likes and dislikes)  
-| Column    | Type     | Constraints                                    |  
-|-----------|---------|------------------------------------------------|  
-| id        | INTEGER | PRIMARY KEY, AUTOINCREMENT                    |  
-| user_id   | INTEGER | FOREIGN KEY → users(id)                      |  
-| post_id   | INTEGER | FOREIGN KEY → posts(id), NULLABLE (for comments) |  
-| comment_id | INTEGER | FOREIGN KEY → comments(id), NULLABLE (for posts) |  
-| type      | INTEGER | CHECK (type IN (1, -1)) (1 = like, -1 = dislike) |  
-| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP                   |  
+- **Communication between users**: Users can interact by creating posts and comments.
+- **Image Upload**: Users can also interact by uploading images to the posts they are trying to make.
+- **Categorization of posts**: Posts can be associated with one or more categories.
+- **Likes and dislikes**: Users can like or dislike posts and comments, with the counts visible to everyone.
+- **Filtering posts**: Posts can be filtered by categories, user-created posts, and liked posts.
 
 ---
+
+## SQLite
+
+SQLite is used to store the forum's data (e.g., users, posts, likes, dislikes, comments). It is an embedded database software ideal for local storage in application software.
+
+### Notes:
+
+SQLite enables creating and controlling a database using queries. To learn more about SQLite, visit the [SQLite documentation](https://sqlite.org/).
+
+---
+
+## Authentication
+
+The forum supports user authentication through the following methods:
+
+- **Registration**:
+  - Users can register with a unique username and email.
+  - A password is required during registration, and it is encrypted before storing.
+- **Login**:
+  - Users can log in using their email and password.
+  - If the credentials are incorrect, an error response is returned.
+
+### Sessions:
+
+- User sessions are managed using **cookies** to keep users logged in.
+
+## Communication
+
+To facilitate communication among users:
+
+- **Registered users**:
+  - Can create posts and comments.
+  - Posts can be associated with one or more categories (you decide the categories).
+- **Non-registered users**:
+  - Can only view posts and comments.
+
+---
+
+## Likes and Dislikes
+
+- Only registered users can like or dislike posts and comments.
+- The total number of likes and dislikes is visible to everyone (registered or not).
+
+---
+
+## Filter
+
+The forum includes a filtering mechanism to:
+
+- Filter posts by **categories** (like subforums for specific topics).
+- Display posts created by the logged-in user (**created posts**).
+- Display posts liked by the logged-in user (**liked posts**).
+
+## Docker Usage
+
+### Building the Docker Image
+
+Navigate to the root directory of your project. 2. Run the following command to build the Docker image:
+
+```bash
+
+   docker build -t <image name> -f docker/Dockerfile .
 ```
+
+## Running the Docker Container in the server
+
+```bash
+docker run -it -p 8080:8080 <name of the image>
+
+```
+
+## To Run in the container
+
+```bash
+
+docker container run -d -p 8080:8080 --name forum <name of container>
+```
+
+## How to run the application
+
+1. Clone the Repository:
+
+```
+   git clone https://learn.zone01kisumu.ke/git/oumouma/forum-authentication.git
+cd forum
+```
+
+2. Run the following command:
+
+```
+   go run /cmd/main.go
+```
+
+3. On your Web Browser:
+
+```
+   localhost:8000
+```
+
+## Contributing
+
+We love collaboration! Pull requests are welcome, and for major changes, please open an issue first to discuss your ideas. Let’s make this project even better together!
+
+## Authors
+
+[Kennedy Ada](https://github.com/adaken4)
+
+[Vallary Muhembe](https://learn.zone01kisumu.ke/git/vmuhembe/forum.git)
+
+[Ouma Ouma](https://learn.zone01kisumu.ke/git/oumouma/forum-authentication.git)
+
+[Brian Oiko](https://github.com/Brace1000)
+
+[Sheilla juma](https://learn.zone01kisumu.ke/git/sjuma)

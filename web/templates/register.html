@@ -1,0 +1,60 @@
+{{ define "title" }}Register{{ end }} 
+
+{{ define "content" }}
+<h2>Register</h2>
+<form method="POST" action="/register" enctype="multipart/form-data">
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username" required />
+    {{ if .username }}
+    <span style="color: red;">{{ .username }}</span>
+    {{ end }}
+    <br />
+
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" required />
+    {{ if .email }}
+    <span style="color: red;">{{ .email }}</span>
+    {{ end }}
+    <br />
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" required />
+    {{ if .password }}
+    <span style="color: red;">{{ .password }}</span>
+    {{ end }}
+    <br />
+
+    <label for="confirmpassword">Confirm Password</label>
+    <input type="password" id="confirmpassword" name="confirmpassword" required />
+    {{ if .confirmpassword }}
+    <span style="color: red;">{{ .confirmpassword }}</span>
+    {{ end }}
+    <br />
+    <label for="pic">profile picture</label>
+    <input type="file" name="img" accept="img/*" >
+    <br/>
+    <label for="bio">About</label>
+    <input type="text" name="bio" >
+    <br/>
+
+    <button type="submit">Register</button>
+
+    <p>Already have an account? <a href="/login">login here</a></p>
+</form>
+
+<!-- Social Login Section -->
+<div class="social-login">
+    <a href="/auth/google">
+        <button type="button" class="social-btn google">
+            <img src="/static/svgs/google.svg" alt="Google" />
+            <span>login with Google</span>
+        </button>
+    </a>
+    <a href="/auth/github">
+        <button type="button" class="social-btn google">
+            <img src="/static/svgs/github.svg" alt="Github" />
+            <span>Login with GitHub</span>
+        </button>
+    </a>
+</div>
+{{ end }}

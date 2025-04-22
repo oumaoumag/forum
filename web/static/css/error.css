@@ -1,0 +1,11 @@
+/* static/css/error.css */
+.error-page {
+	font-family: Arial, sans-serif;
+	padding: 20px;
+	max-width: 600px;
+	margin: 0 auto;
+}
+.error-title {
+	color: #dc3545;
+	font-size: 1.5rem;
+}

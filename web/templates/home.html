@@ -1,0 +1,76 @@
+{{ define "title" }}Home{{ end }} {{define "content"}}
+<h2>Forum Home Page</h2>
+<a href="/post/create" style="margin-bottom: 20px"
+  ><button>Create Post</button></a
+>
+
+{{ if .Posts }} {{ range .Posts }}
+<div class="post">
+  <h2>{{ .Title }}</h2>
+  <p>
+    <strong>Posted by:</strong> {{ .Username }} | <strong>Categories:</strong>
+    {{ range $index, $cat := .Categories }} {{ if $index }}, {{ end }}
+    <span>{{ $cat }}</span>
+    {{ else }} Uncategorized {{ end }} | <strong>Created </strong> {{ .CreatedAt
+    }}
+  </p>
+  <p>{{ .Content }}</p>
+  {{ if .Imgurl}}
+  <img src="{{.Imgurl}}" alt=""  class="img" />
+  {{end}}
+  <div>
+    <button
+      id="like-post-{{ .PostID }}"
+      onclick="reactToPost({{$.CurrentUserID}}, {{.PostID}}, 'like')"
+    >
+      👍 <span id="post-like-count-{{ .PostID }}">{{ .LikeCount }}</span>
+    </button>
+    <button
+      id="dislike-post-{{ .PostID }}"
+      onclick="reactToPost({{$.CurrentUserID}}, {{.PostID}}, 'dislike')"
+    >
+      👎 <span id="post-dislike-count-{{ .PostID }}">{{ .DislikeCount }}</span>
+    </button>
+    <button onclick="OpenComments(('{{.PostID}}'))">
+      Comments {{.CommentCount}}
+    </button>
+  </div>
+  <div class="close" id="{{.PostID}}" style="height: 290px; overflow-y: scroll">
+    <h3>Add a comment</h3>
+    <form method="POST" action="/comment/create">
+      <input type="hidden" name="post_id" value="{{ .PostID }}" />
+      <textarea name="content" rows="4" required></textarea>
+      <br />
+      <button type="submit">Submit</button>
+    </form>
+    {{ if .Comments }} {{ range .Comments }}
+    <div class="comment">
+      <p><strong>{{ .Username }}</strong> {{ .CreatedAt }}</p>
+      <p>{{ .Content }}</p>
+      <button
+        id="like-comment-{{ .CommentID }}"
+        onclick="reactToComment({{$.CurrentUserID}}, {{.CommentID}}, 'like')"
+      >
+        👍
+        <span id="comment-like-count-{{ .CommentID }}">{{ .LikeCount }}</span>
+      </button>
+      <button
+        id="dislike-comment-{{ .CommentID }}"
+        onclick="reactToComment({{$.CurrentUserID}}, {{.CommentID}}, 'dislike')"
+      >
+        👎
+        <span id="comment-dislike-count-{{ .CommentID }}"
+          >{{ .DislikeCount }}</span
+        >
+      </button>
+    </div>
+    {{end}} {{ else }}
+    <p>No comments yet. Be the first to comment!</p>
+    {{ end }}
+
+    <!-- Add Comment Form -->
+  </div>
+</div>
+{{ end }} {{ else }}
+<p>No posts to display.</p>
+{{ end }} {{ end }}
